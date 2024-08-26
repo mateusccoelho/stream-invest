@@ -1,0 +1,31 @@
+https://www.portaldefinancas.com/js-tx/cdidiaria.js
+
+Aportes RF
+    ID título
+    Corretora 
+    Emissor
+    Tipo 
+    Forma
+    Indexador
+    Data compra
+    Data vencimento
+    Taxa
+    Valor aplicado
+
+Resgates RF
+    ID título
+    Data 
+    Valor
+
+Indicadores
+    Data
+    VNA
+    IBOV
+    CDI
+
+Carteira RF
+    ID título
+    Data atualização
+    Saldo
+    Resgates
+    Rendimentos bruto
