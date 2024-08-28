@@ -6,10 +6,10 @@ from datetime import date
 import numpy as np
 import pandas as pd
 
-from db.atualizar_indicadores import extrair_ticker
+from atualizar_indicadores import extrair_ticker
 
 
-def le_dados_excel(sheet: str = None) -> dict[pd.DataFrame]:
+def le_dados_excel(sheet: str = None) -> pd.DataFrame | dict[str, pd.DataFrame]:
     return pd.read_excel(
         "dados/Investimentos.xlsx", 
         sheet_name=sheet, 

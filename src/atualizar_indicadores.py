@@ -12,23 +12,21 @@ import yfinance as yf
 from utils.calendario import le_dias_uteis, dia_util_anterior
 
 
-# def listar_dados_faltantes(
-#     session: SessionType, indicador: str, dias: int
-# ) -> pd.Series:
-#     data_fim = date.today()
-#     data_inicio = data_fim - timedelta(days=dias)
+def listar_dados_faltantes(indicador: str, dias: int) -> pd.Series:
+    data_fim = date.today()
+    data_inicio = data_fim - timedelta(days=dias)
 
-#     dias_uteis = le_dias_uteis()
-#     dias_uteis = dias_uteis[(dias_uteis >= data_inicio) & (dias_uteis <= data_fim)]
+    dias_uteis = le_dias_uteis()
+    dias_uteis = dias_uteis[(dias_uteis >= data_inicio) & (dias_uteis <= data_fim)]
 
-#     results = (
-#         session.query(Cotacoes.data)
-#         .filter(Cotacoes.codigo == indicador, Cotacoes.data.in_(dias_uteis))
-#         .all()
-#     )
+    results = (
+        session.query(Cotacoes.data)
+        .filter(Cotacoes.codigo == indicador, Cotacoes.data.in_(dias_uteis))
+        .all()
+    )
 
-#     datas_na_tabela = {result.data for result in results}
-#     return dias_uteis[~dias_uteis.isin(datas_na_tabela)]
+    datas_na_tabela = {result.data for result in results}
+    return dias_uteis[~dias_uteis.isin(datas_na_tabela)]
 
 
 # def valor_anterior_preenchido(
@@ -117,34 +115,35 @@ from utils.calendario import le_dias_uteis, dia_util_anterior
 #         print(f"IBOV em {data} atualizado para {valor}")
 
 
-# def atualizar_indicadores_anbima(indicador: str):
-#     with Session() as session:
-#         datas_faltantes = listar_dados_faltantes(session, indicador, 60)
+def atualizar_indicadores_anbima(indicador: str):
+    datas_faltantes = listar_dados_faltantes(indicador, 60)
 
-#     if datas_faltantes.empty:
-#         print(f"Não há dados faltantes em IBOV")
-#         return
+    if datas_faltantes.empty:
+        print(f"Não há dados faltantes em {indicador}")
+        return
+    
+    mapa_funcoes = {
+        "IMAB 5": extrair_imab5,
+        "VNA": extrair_vna,
+    }
 
-#     for data in datas_faltantes:
-#         func = extract_imab5 if indicador == "IMAB 5" else extract_vna
-#         valor = func(data)
+    for data in datas_faltantes:
+        valor = mapa_funcoes[indicador](data)
 
-#         if not valor:
-#             print(f"Dado faltante para {indicador} em {data}")
-#             continue
+        if not valor:
+            print(f"Dado faltante para {indicador} em {data}")
+            continue
 
-#         with Session() as session:
-#             valor_anterior = valor_anterior_preenchido(session, indicador, data)
-#             cotacao = Cotacoes(
-#                 data=data,
-#                 codigo=indicador,
-#                 valor=valor,
-#                 variacao=valor / valor_anterior,
-#             )
-#             session.add(cotacao)
-#             session.commit()
+        
+        valor_anterior = valor_anterior_preenchido(session, indicador, data)
+        cotacao = Cotacoes(
+            data=data,
+            codigo=indicador,
+            valor=valor,
+            variacao=valor / valor_anterior,
+        )
 
-#         print(f"{indicador} em {data} atualizado para {valor}")
+        print(f"{indicador} em {data} atualizado para {valor}")
 
 
 def extrair_cdi() -> pd.Series:
