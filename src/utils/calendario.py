@@ -16,13 +16,17 @@ def le_feriados() -> List[pd.Timestamp]:
 
 def le_dias_uteis() -> List[pd.Timestamp]:
     csv_path = str(FILE_PATH / "dias_uteis.csv")
-    dias_uteis = pd.read_csv(csv_path, header=None, parse_dates=[0]).squeeze("columns").dt.date
+    dias_uteis = (
+        pd.read_csv(csv_path, header=None, parse_dates=[0]).squeeze("columns").dt.date
+    )
     return dias_uteis
 
 
 def le_dias_sem_pregao() -> List[pd.Timestamp]:
     csv_path = str(FILE_PATH / "dias_sem_pregao.csv")
-    dias_sem_pregao = pd.read_csv(csv_path, header=None, parse_dates=[0]).squeeze("columns").dt.date
+    dias_sem_pregao = (
+        pd.read_csv(csv_path, header=None, parse_dates=[0]).squeeze("columns").dt.date
+    )
     return dias_sem_pregao
 
 
@@ -51,6 +55,12 @@ def dia_util_anterior(data: date, considerar_pregao=False) -> pd.Timestamp:
 
     idx = dias_uteis[dias_uteis == data].index[0]
     return dias_uteis[idx - 1]
+
+
+def calcular_dias_uteis_entre(data_inicial: date, data_final: date) -> int:
+    dias_uteis = le_dias_uteis()
+    dias_uteis = dias_uteis[(dias_uteis >= data_inicial) & (dias_uteis <= data_final)]
+    return dias_uteis
 
 
 if __name__ == "__main__":

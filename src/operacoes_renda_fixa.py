@@ -249,10 +249,15 @@ def remove_titulo(id_titulo: int):
 
 def atualizar_titulos():
     with Session() as session:
-        data_max = session.query(
-            Cotacoes.codigo,
-            func.max(Cotacoes.data),
-        ).filter(Cotacoes.codigo.in_(["VNA", "CDI"])).group_by(Cotacoes.codigo).all()
+        data_max = (
+            session.query(
+                Cotacoes.codigo,
+                func.max(Cotacoes.data),
+            )
+            .filter(Cotacoes.codigo.in_(["VNA", "CDI"]))
+            .group_by(Cotacoes.codigo)
+            .all()
+        )
         data_max = dict(data_max)
 
         carteira_info = session.query(CarteiraRF, AportesRendaFixa).filter(
@@ -270,7 +275,7 @@ def atualizar_titulos():
                 continue
 
             novo_valor = calcula_valor_titulo_periodo(
-                tipo_rentabilidade=,
+                # tipo_rentabilidade=,
                 data_inicio=data_atualizacao,
                 data_fim=data_vencimento,
                 taxa=row.AportesRendaFixa.taxa,
@@ -306,5 +311,3 @@ def atualizar_titulos():
                     + novo_valor["rendimento"].sum(),
                 }
             )
-        
-        

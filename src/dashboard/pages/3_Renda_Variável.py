@@ -1,5 +1,6 @@
 import sys
-sys.path.append('..')
+
+sys.path.append("..")
 
 import pandas as pd
 import streamlit as st
@@ -21,4 +22,3 @@ df_formatado = formatar_df_renda_var(renda_var_df, filtrar_invativos)
 
 st.subheader("Lista de ativos")
 st.dataframe(df_formatado, hide_index=True)
-

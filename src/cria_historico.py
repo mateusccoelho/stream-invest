@@ -1,44 +1,26 @@
-import sys
-sys.path.append("../../")
-
 from datetime import date
 
 import numpy as np
 import pandas as pd
 
-from atualizar_indicadores import extrair_ticker
-
-
-def le_dados_excel(sheet: str = None) -> pd.DataFrame | dict[str, pd.DataFrame]:
-    return pd.read_excel(
-        "dados/Investimentos.xlsx", 
-        sheet_name=sheet, 
-        engine="openpyxl"
-    )
-
-
-def le_dados_indicadores() -> pd.DataFrame:
-    return pd.read_excel(
-        "dados/Investimentos - Restos.xlsx",
-        sheet_name="Indicadores",
-        engine="openpyxl",
-    )
+from indicadores import extrair_ticker
 
 
 def cria_df_indicadores(df: pd.DataFrame) -> pd.DataFrame:
     df["Data"] = pd.to_datetime(df["Data"], format="%d/%m/%Y").dt.date
     df = df.set_index("Data").dropna(how="all")
-    
+
     indicadores = {
         "VNA": ["VNA", "Fator VNA"],
         "IBOV": ["IBOV", "Fator IBOV"],
         "IMAB 5": ["IMAB 5", "Fator IMAB 5"],
     }
-    
+
     dfs_indicadores = []
     for nome, colunas in indicadores.items():
         df_ind = (
-            df[colunas].dropna(how="all")
+            df[colunas]
+            .dropna(how="all")
             .reset_index()
             .assign(codigo=nome)
             .rename(columns={nome: "valor", colunas[1]: "variacao", "Data": "data"})
@@ -47,7 +29,8 @@ def cria_df_indicadores(df: pd.DataFrame) -> pd.DataFrame:
         dfs_indicadores.append(df_ind)
 
     dfs_indicadores.append(
-        df[["CDI"]].dropna(how="all")
+        df[["CDI"]]
+        .dropna(how="all")
         .reset_index()
         .assign(codigo="CDI", valor=np.nan)
         .rename(columns={"CDI": "variacao", "Data": "data"})
@@ -73,14 +56,13 @@ def cria_parquet_cotacoes():
         dfs_tickers.append(df_ticker)
 
     cotacoes_bolsa = pd.concat(dfs_tickers)
-    
+
     df_indicadores_historico = le_dados_indicadores()
     cotacoes_indicadores = cria_df_indicadores(df_indicadores_historico)
 
-    cotacoes = pd.concat([
-        cotacoes_indicadores, 
-        cotacoes_bolsa
-    ]).sort_values(["codigo", "data"])
+    cotacoes = pd.concat([cotacoes_indicadores, cotacoes_bolsa]).sort_values(
+        ["codigo", "data"]
+    )
 
     cotacoes.to_parquet("dados/cotacoes.parquet", index=False)
 
