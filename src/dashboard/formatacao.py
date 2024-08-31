@@ -5,6 +5,55 @@ locale.setlocale(locale.LC_ALL, "pt_BR")
 import pandas as pd
 
 
+def formatar_dinheiro(valor: float) -> str:
+    return locale.currency(valor, grouping=True, symbol="R$")
+
+
+def formatar_df_proventos_ativo(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+
+    for col in ["ultimo_pag"]:
+        df[col] = pd.to_datetime(df[col]).dt.strftime("%d/%m/%Y")
+
+    for col in ["total"]:
+        df[col] = df[col].apply(formatar_dinheiro)
+
+    df = (
+        df.reset_index()
+        .rename(
+            columns={
+                "codigo": "Código",
+                "total": "Total recebido/provisionado",
+                "qtd": "# Pagamentos",
+                "ultimo_pag": "Último pagamento",
+            }
+        )
+    )
+    return df
+
+def formatar_df_proventos(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+
+    for col in ["dt_pag"]:
+        df[col] = pd.to_datetime(df[col]).dt.strftime("%d/%m/%Y")
+
+    for col in ["valor", "total"]:
+        df[col] = df[col].apply(formatar_dinheiro)
+
+    df = (
+        df.filter(["dt_pag", "codigo", "qtd", "valor", "total", "tipo"])
+        .rename(columns={
+            "dt_pag": "Data de pagamento",
+            "tipo": "Tipo",
+            "codigo": "Código",
+            "qtd": "Quantidade",
+            "valor": "Valor",
+            "total": "Total",
+        })
+    )
+    return df
+
+
 def formatar_df_renda_fixa(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
     df = df.copy()
 
@@ -21,9 +70,7 @@ def formatar_df_renda_fixa(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
     df["status"] = df["status"].map({1: "Sim", 0: "Não"})
 
     for col in ["valor_aplicado", "saldo", "rendimentos_bruto", "resgates"]:
-        df[col] = df[col].apply(
-            lambda x: locale.currency(x, grouping=True, symbol="R$")
-        )
+        df[col] = df[col].apply(formatar_dinheiro)
 
     df = df.rename(
         columns={

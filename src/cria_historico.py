@@ -1,10 +1,16 @@
-from datetime import date
-
 import numpy as np
 import pandas as pd
 
 from indicadores import TickerBolsa
-from excel import le_dados_excel, le_dados_indicadores
+from src.consolidar_carteira import le_dados_excel
+
+
+def le_dados_indicadores() -> pd.DataFrame:
+    return pd.read_excel(
+        "dados/Investimentos - Restos.xlsx",
+        sheet_name="Indicadores",
+        engine="openpyxl",
+    )
 
 
 def cria_df_indicadores(df: pd.DataFrame) -> pd.DataFrame:
