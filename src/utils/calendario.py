@@ -4,18 +4,18 @@ from pathlib import Path
 
 import pandas as pd
 
-FILE_PATH = Path(__file__).resolve().parent.parent.parent / "dados"
+CAMINHO_DADOS = Path(__file__).resolve().parent.parent.parent / "dados"
 
 
 def le_feriados() -> List[pd.Timestamp]:
-    csv_path = str(FILE_PATH / "feriados.csv")
+    csv_path = str(CAMINHO_DADOS / "feriados.csv")
     feriados = pd.read_csv(csv_path, header=None)[0].tolist()
     feriados = pd.to_datetime(feriados, format="%d/%m/%Y")
     return feriados
 
 
 def le_dias_uteis() -> List[pd.Timestamp]:
-    csv_path = str(FILE_PATH / "dias_uteis.csv")
+    csv_path = str(CAMINHO_DADOS / "dias_uteis.csv")
     dias_uteis = (
         pd.read_csv(csv_path, header=None, parse_dates=[0]).squeeze("columns").dt.date
     )
@@ -23,7 +23,7 @@ def le_dias_uteis() -> List[pd.Timestamp]:
 
 
 def le_dias_sem_pregao() -> List[pd.Timestamp]:
-    csv_path = str(FILE_PATH / "dias_sem_pregao.csv")
+    csv_path = str(CAMINHO_DADOS / "dias_sem_pregao.csv")
     dias_sem_pregao = (
         pd.read_csv(csv_path, header=None, parse_dates=[0]).squeeze("columns").dt.date
     )
@@ -43,7 +43,7 @@ def dias_uteis_no_intervalo(data_inicial: date, data_final: date) -> List[date]:
 def gerar_csv_dias_uteis():
     dias_uteis = dias_uteis_no_intervalo(date(2020, 1, 1), date(2030, 12, 31))
     df = pd.DataFrame(dias_uteis, columns=["Data"])
-    df.to_csv(str(FILE_PATH / "dias_uteis.csv"), index=False, header=False)
+    df.to_csv(str(CAMINHO_DADOS / "dias_uteis.csv"), index=False, header=False)
 
 
 def dia_util_anterior(data: date, considerar_pregao=False) -> pd.Timestamp:
