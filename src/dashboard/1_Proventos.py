@@ -6,7 +6,11 @@ sys.path.append("../../")
 import streamlit as st
 import pandas as pd
 
-from src.dashboard.dados import carregar_dados, agrupar_proventos_por_ativo
+from src.dashboard.dados import (
+    carregar_dados, 
+    agrupar_proventos_por_ativo, 
+    enriquecer_df_proventos,
+)
 from src.dashboard.formatacao import (
     formatar_df_proventos,
     formatar_dinheiro,
@@ -61,4 +65,7 @@ st.set_page_config(
 )
 
 dados = carregar_dados()
-pagina_proventos(dados["proventos"])
+proventos = enriquecer_df_proventos(
+    dados["proventos"], dados["ativos_rv"]
+)
+pagina_proventos(proventos)

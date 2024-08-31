@@ -1,48 +1,11 @@
+from datetime import date
 from typing import List
 import sys
-
 sys.path.append("..")
-from datetime import date
 
 import pandas as pd
-from sqlalchemy.orm import Session as SessionType
 
-from db.definicao_tabelas import (
-    Session,
-    TransacoesRV,
-    ProventosRV,
-    Cotacoes,
-    PatrimonioRV,
-    AtivosRV,
-    CarteiraRV,
-)
 from utils.calendario import dias_uteis_no_intervalo, dia_util_anterior
-
-
-def adiciona_provento(
-    data: date, codigo: str, valor: float, quantidade: int, tipo: str
-):
-    with Session() as session:
-        provento = ProventosRV(
-            data_pagamento=data,
-            codigo=codigo,
-            valor=valor,
-            quantidade=quantidade,
-            tipo=tipo,
-        )
-        session.add(provento)
-        session.commit()
-
-
-def adiciona_ativo(codigo: str, tipo: str, benchmark: str):
-    with Session() as session:
-        ativo = AtivosRV(
-            codigo=codigo,
-            tipo=tipo,
-            benchmark=benchmark,
-        )
-        session.add(ativo)
-        session.commit()
 
 
 def calcula_patrimonio_rv(

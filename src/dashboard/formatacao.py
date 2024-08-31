@@ -21,6 +21,7 @@ def formatar_df_proventos_ativo(df: pd.DataFrame) -> pd.DataFrame:
     df = df.reset_index().rename(
         columns={
             "codigo": "Código",
+            "tipo_ativo": "Tipo",
             "total": "Total recebido/provisionado",
             "qtd": "# Pagamentos",
             "ultimo_pag": "Último pagamento",
