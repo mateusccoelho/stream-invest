@@ -11,11 +11,11 @@ def plotar_proventos(proventos: pd.DataFrame, por_ativo=False):
     colunas_agrup = ["anomes"]
     if por_ativo:
         colunas_agrup.append("codigo")
-        
+
     proventos_agg = proventos.groupby(colunas_agrup, as_index=False)["total"].sum()
     fig = px.bar(
-        proventos_agg, 
-        x="anomes", 
+        proventos_agg,
+        x="anomes",
         y="total",
         color="codigo" if por_ativo else None,
         text_auto=False if por_ativo else True,
@@ -27,9 +27,10 @@ def plotar_proventos(proventos: pd.DataFrame, por_ativo=False):
         title="Proventos por mês",
         color_discrete_sequence=px.colors.qualitative.Plotly,
     )
-    fig.update_xaxes(tickformat = '%B, %Y', dtick='M1')
+    fig.update_xaxes(tickformat="%B, %Y", dtick="M1")
     fig.update_layout(hovermode="x unified")
     return fig
+
 
 def plotar_saldo_no_tempo(valores_titulo: pd.DataFrame):
     fig = go.Figure()

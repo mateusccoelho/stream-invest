@@ -11,7 +11,7 @@ from src.consolidar_carteira import consolidar_carteira
 @st.cache_resource
 def carregar_dados() -> dict[str, pd.DataFrame]:
     return consolidar_carteira()
-    
+
 
 @st.cache_resource
 def agrupar_proventos_por_ativo(proventos: pd.DataFrame) -> pd.DataFrame:

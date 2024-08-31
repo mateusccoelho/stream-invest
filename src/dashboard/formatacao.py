@@ -18,18 +18,16 @@ def formatar_df_proventos_ativo(df: pd.DataFrame) -> pd.DataFrame:
     for col in ["total"]:
         df[col] = df[col].apply(formatar_dinheiro)
 
-    df = (
-        df.reset_index()
-        .rename(
-            columns={
-                "codigo": "Código",
-                "total": "Total recebido/provisionado",
-                "qtd": "# Pagamentos",
-                "ultimo_pag": "Último pagamento",
-            }
-        )
+    df = df.reset_index().rename(
+        columns={
+            "codigo": "Código",
+            "total": "Total recebido/provisionado",
+            "qtd": "# Pagamentos",
+            "ultimo_pag": "Último pagamento",
+        }
     )
     return df
+
 
 def formatar_df_proventos(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
@@ -40,16 +38,15 @@ def formatar_df_proventos(df: pd.DataFrame) -> pd.DataFrame:
     for col in ["valor", "total"]:
         df[col] = df[col].apply(formatar_dinheiro)
 
-    df = (
-        df.filter(["dt_pag", "codigo", "qtd", "valor", "total", "tipo"])
-        .rename(columns={
+    df = df.filter(["dt_pag", "codigo", "qtd", "valor", "total", "tipo"]).rename(
+        columns={
             "dt_pag": "Data de pagamento",
             "tipo": "Tipo",
             "codigo": "Código",
             "qtd": "Quantidade",
             "valor": "Valor",
             "total": "Total",
-        })
+        }
     )
     return df
 
