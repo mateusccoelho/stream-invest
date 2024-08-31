@@ -2,6 +2,7 @@ import re
 from datetime import date
 from io import StringIO
 from abc import ABC, abstractmethod
+import time
 
 import requests
 import pandas as pd
@@ -16,6 +17,7 @@ class IndicadorAbstrato(ABC):
 
 class IMAB5(IndicadorAbstrato):
     def extrair(self, data: date) -> float:
+        time.sleep(1)
         resposta = requests.post(
             "https://www.anbima.com.br/informacoes/ima/ima-sh-down.asp",
             data={
@@ -52,6 +54,7 @@ class IMAB5(IndicadorAbstrato):
 
 class VNA(IndicadorAbstrato):
     def extrair(self, data: date) -> float:
+        time.sleep(1)
         resposta = requests.post(
             "https://www.anbima.com.br/informacoes/vna/vna-down.asp",
             data={
@@ -115,7 +118,10 @@ class CDI(IndicadorAbstrato):
         return cdi_series
 
     def extrair(self, data: date) -> float:
-        return self.serie.loc[data]
+        try:
+            return self.serie.loc[data]
+        except KeyError:
+            return None
 
 
 class TickerBolsa(IndicadorAbstrato):
@@ -123,10 +129,13 @@ class TickerBolsa(IndicadorAbstrato):
         self.ticker = ticker
         self.serie = self.baixar_serie()
 
-    def baixar_serie(self) -> pd.Series:
-        cotacoes = yf.Ticker(self.ticker).history()
+    def baixar_serie(self, history_period: str = "1y") -> pd.Series:
+        cotacoes = yf.Ticker(self.ticker).history(history_period, rounding=True)
         cotacoes.index = cotacoes.index.map(lambda x: x.date())
         return cotacoes["Close"]
 
     def extrair(self, data: date) -> float:
-        return self.serie.loc[data]
+        try:
+            return self.serie.loc[data]
+        except KeyError:
+            return None

@@ -46,10 +46,15 @@ class Cotacoes:
             df_layout["valor"] = valores
             df_layout["variacao"] = np.nan
 
-        return pd.DataFrame(df_layout)
+        novas_cotacoes = pd.DataFrame(df_layout)
+        if not variacao:
+            novas_cotacoes = novas_cotacoes.loc[novas_cotacoes["valor"].notnull(), :]
+        return novas_cotacoes
 
     def _calcular_variacoes_faltantes(self):
-        variacoes = self.cotacoes.groupby("codigo")["valor"].pct_change(fill_method=None) + 1
+        variacoes = (
+            self.cotacoes.groupby("codigo")["valor"].pct_change(fill_method=None) + 1
+        )
         linhas_sem_variacao = (
             self.cotacoes["valor"].notnull() & self.cotacoes["variacao"].isnull()
         )
@@ -84,127 +89,16 @@ class Cotacoes:
                 True if nome_indicador == "CDI" else False,
             )
 
-            self.cotacoes = pd.concat([self.cotacoes, novas_cotacoes]).sort_values(
-                ["codigo", "data"]
-            )
+            if not novas_cotacoes.empty:
+                self.cotacoes = pd.concat([self.cotacoes, novas_cotacoes]).sort_values(
+                    ["codigo", "data"]
+                )
+            else:
+                print(
+                    f"{nome_indicador} tem dados faltantes mas não é possível preenchê-los"
+                )
 
         self._calcular_variacoes_faltantes()
 
     def salvar_cotacoes(self):
-        self.cotacoes.to_parquet("data/cotacoes.parquet", index=False)
-
-
-# def valor_anterior_preenchido(
-#     session: SessionType, indicador: str, data: date, considerar_pregao=False
-# ) -> float:
-#     dia_anterior = dia_util_anterior(data, considerar_pregao)
-#     result = (
-#         session.query(Cotacoes.valor)
-#         .filter(Cotacoes.codigo == indicador, Cotacoes.data == dia_anterior)
-#         .one()
-#     )
-#     return result.valor
-
-
-# def atualizar_ativo_bolsa(ticker: str):
-#     with Session() as session:
-#         datas_faltantes = listar_dados_faltantes(session, ticker, 60)
-#         if datas_faltantes.empty:
-#             print(f"Não há dados faltantes em {ticker}")
-#             return
-
-#         df_precos = extract_ticker(ticker, datas_faltantes.iloc[0])
-#         for data in datas_faltantes:
-#             if data not in df_precos["Date"].values:
-#                 print(f"Dado faltante para {ticker} em {data}")
-#                 continue
-
-#             valor = df_precos.loc[df_precos["Date"].eq(data), "Close"].iloc[0]
-#             cotacao = Cotacoes(
-#                 data=data,
-#                 codigo=ticker,
-#                 valor=valor,
-#                 variacao=df_precos.loc[df_precos["Date"].eq(data), "Variacao"].iloc[0],
-#             )
-#             session.add(cotacao)
-#             print(f"{ticker} em {data} atualizado para {valor}")
-
-#         session.commit()
-
-
-# def atualizar_cdi():
-#     with Session() as session:
-#         datas_faltantes = listar_dados_faltantes(session, "CDI", 60)
-#         if datas_faltantes.empty:
-#             print(f"Não há dados faltantes em CDI")
-#             return
-
-#         serie_fator_diario = extract_cdi()
-
-#         for data in datas_faltantes:
-#             if data not in serie_fator_diario:
-#                 print(f"Dado faltante para CDI em {data}")
-#                 continue
-
-#             valor = serie_fator_diario.loc[data]
-#             cotacao = Cotacoes(data=data, codigo="CDI", variacao=valor)
-#             session.add(cotacao)
-#             print(f"CDI em {data} atualizado para {valor}")
-
-#         session.commit()
-
-
-# def atualizar_ibov():
-#     with Session() as session:
-#         datas_faltantes = listar_dados_faltantes(session, "IBOV", 60)
-
-#     if datas_faltantes.empty:
-#         print(f"Não há dados faltantes em IBOV")
-#         return
-
-#     serie_ibov = extract_ibov()
-#     for data in datas_faltantes:
-#         if data not in serie_ibov:
-#             print(f"Dado faltante para IBOV em {data}")
-#             continue
-
-#         valor = serie_ibov.loc[data]
-#         with Session() as session:
-#             valor_anterior = valor_anterior_preenchido(session, "IBOV", data, True)
-#             cotacao = Cotacoes(
-#                 data=data, codigo="IBOV", valor=valor, variacao=valor / valor_anterior
-#             )
-#             session.add(cotacao)
-#             session.commit()
-
-#         print(f"IBOV em {data} atualizado para {valor}")
-
-
-def atualizar_indicadores_anbima(indicador: str):
-    datas_faltantes = listar_dados_faltantes(indicador, 60)
-
-    if datas_faltantes.empty:
-        print(f"Não há dados faltantes em {indicador}")
-        return
-
-    mapa_funcoes = {
-        "IMAB 5": extrair_imab5,
-        "VNA": extrair_vna,
-    }
-
-    for data in datas_faltantes:
-        valor = mapa_funcoes[indicador](data)
-
-        if not valor:
-            print(f"Dado faltante para {indicador} em {data}")
-            continue
-
-        valor_anterior = valor_anterior_preenchido(session, indicador, data)
-        cotacao = Cotacoes(
-            data=data,
-            codigo=indicador,
-            valor=valor,
-            variacao=valor / valor_anterior,
-        )
-
-        print(f"{indicador} em {data} atualizado para {valor}")
+        self.cotacoes.to_parquet("dados/cotacoes.parquet", index=False)

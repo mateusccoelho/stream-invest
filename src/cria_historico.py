@@ -3,7 +3,8 @@ from datetime import date
 import numpy as np
 import pandas as pd
 
-from indicadores import extrair_ticker
+from indicadores import TickerBolsa
+from excel import le_dados_excel, le_dados_indicadores
 
 
 def cria_df_indicadores(df: pd.DataFrame) -> pd.DataFrame:
@@ -47,12 +48,14 @@ def cria_parquet_cotacoes():
 
     dfs_tickers = []
     for codigo in codigos:
-        df_ticker = extrair_ticker(codigo, date(2024, 1, 2))
+        valores = TickerBolsa(codigo + ".SA").serie
         df_ticker = (
-            df_ticker.assign(codigo=codigo)
-            .rename(columns={"Close": "valor", "Date": "data", "Variacao": "variacao"})
+            valores.reset_index()
+            .assign(codigo=codigo, variacao=np.nan)
+            .rename(columns={"Close": "valor", "Date": "data"})
             .filter(["data", "codigo", "valor", "variacao"])
         )
+        df_ticker["variacao"] = df_ticker["valor"].pct_change(fill_method=None) + 1
         dfs_tickers.append(df_ticker)
 
     cotacoes_bolsa = pd.concat(dfs_tickers)
