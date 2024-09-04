@@ -57,21 +57,6 @@ class CarteiraRV(Base):
         )
 
 
-class Cotacoes(Base):
-    __tablename__ = "Cotacoes"
-
-    data = Column(Date, primary_key=True)
-    codigo = Column(String, primary_key=True)
-    valor = Column(Float)
-    variacao = Column(Float)
-
-    def __repr__(self) -> str:
-        return (
-            f"<Cotacoes(data='{self.data}', codigo={self.codigo}, "
-            f"valor={self.valor}, variacao={self.variacao})>"
-        )
-
-
 class PatrimonioRV(Base):
     __tablename__ = "PatrimonioRV"
 
@@ -87,6 +72,21 @@ class PatrimonioRV(Base):
             f"<PatrimonioRV(data='{self.data}', codigo={self.codigo}, "
             f"preco_medio={self.preco_medio}, quantidade={self.quantidade}, "
             f"patrimonio={self.patrimonio}, rendimento={self.rendimento})>"
+        )
+
+
+class Cotacoes(Base):
+    __tablename__ = "Cotacoes"
+
+    data = Column(Date, primary_key=True)
+    codigo = Column(String, primary_key=True)
+    valor = Column(Float)
+    variacao = Column(Float)
+
+    def __repr__(self) -> str:
+        return (
+            f"<Cotacoes(data='{self.data}', codigo={self.codigo}, "
+            f"valor={self.valor}, variacao={self.variacao})>"
         )
 
 

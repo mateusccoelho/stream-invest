@@ -5,7 +5,7 @@ sys.path.append("..")
 import pandas as pd
 import streamlit as st
 
-from src.consolidar_carteira import consolidar_carteira
+from src.consolidacao_carteira import consolidar_carteira
 
 
 @st.cache_resource
@@ -24,6 +24,7 @@ def agrupar_proventos_por_ativo(proventos: pd.DataFrame) -> pd.DataFrame:
 
 
 @st.cache_resource
-def enriquecer_df_proventos(proventos: pd.DataFrame, ativos_rv: pd.DataFrame) -> pd.DataFrame:
+def enriquecer_df_proventos(
+    proventos: pd.DataFrame, ativos_rv: pd.DataFrame
+) -> pd.DataFrame:
     return proventos.merge(ativos_rv, on="codigo", how="left")
- 

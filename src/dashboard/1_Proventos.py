@@ -7,8 +7,8 @@ import streamlit as st
 import pandas as pd
 
 from src.dashboard.dados import (
-    carregar_dados, 
-    agrupar_proventos_por_ativo, 
+    carregar_dados,
+    agrupar_proventos_por_ativo,
     enriquecer_df_proventos,
 )
 from src.dashboard.formatacao import (
@@ -65,7 +65,5 @@ st.set_page_config(
 )
 
 dados = carregar_dados()
-proventos = enriquecer_df_proventos(
-    dados["proventos"], dados["ativos_rv"]
-)
+proventos = enriquecer_df_proventos(dados["proventos"], dados["ativos_rv"])
 pagina_proventos(proventos)

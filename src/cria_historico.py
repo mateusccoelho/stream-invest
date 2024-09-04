@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from indicadores import TickerBolsa
-from src.consolidar_carteira import le_dados_excel
+from src.consolidacao_carteira import le_dados_excel
 
 
 def le_dados_indicadores() -> pd.DataFrame:
