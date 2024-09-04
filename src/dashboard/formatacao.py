@@ -9,6 +9,10 @@ def formatar_dinheiro(valor: float) -> str:
     return locale.currency(valor, grouping=True, symbol="R$")
 
 
+def formatar_porcentagem(valor: float) -> str:
+    return "{:.2f}%".format(valor * 100)
+
+
 def formatar_df_proventos_ativo(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
@@ -18,13 +22,19 @@ def formatar_df_proventos_ativo(df: pd.DataFrame) -> pd.DataFrame:
     for col in ["total"]:
         df[col] = df[col].apply(formatar_dinheiro)
 
-    df = df.reset_index().rename(
+    for col in ["yoc_periodo"]:
+        df[col] = df[col].apply(formatar_porcentagem)
+
+    df = df.filter([
+        "codigo", "tipo_ativo", "total", "yoc_periodo", "qtd", "ultimo_pag"
+    ]).rename(
         columns={
             "codigo": "Código",
             "tipo_ativo": "Tipo",
             "total": "Total recebido/provisionado",
             "qtd": "# Pagamentos",
             "ultimo_pag": "Último pagamento",
+            "yoc_periodo": "YoC período",
         }
     )
     return df
@@ -39,16 +49,21 @@ def formatar_df_proventos(df: pd.DataFrame) -> pd.DataFrame:
     for col in ["valor", "total"]:
         df[col] = df[col].apply(formatar_dinheiro)
 
-    df = df.filter(["dt_pag", "codigo", "qtd", "valor", "total", "tipo"]).rename(
-        columns={
-            "dt_pag": "Data de pagamento",
-            "tipo": "Tipo",
-            "codigo": "Código",
-            "qtd": "Quantidade",
-            "valor": "Valor",
-            "total": "Total",
-        }
-    )
+    for col in ["yoc_anualizado"]:
+        df[col] = df[col].apply(formatar_porcentagem)
+
+    df = df.filter([
+        "dt_pag", "codigo", "qtd", "valor", "yoc_anualizado", 
+        "total", "tipo"
+    ]).rename(columns={
+        "dt_pag": "Data de pagamento",
+        "tipo": "Tipo",
+        "codigo": "Código",
+        "qtd": "Quantidade",
+        "valor": "Valor",
+        "total": "Total",
+        "yoc_anualizado": "YoC anualizado",
+    })
     return df
 
 

@@ -65,5 +65,8 @@ st.set_page_config(
 )
 
 dados = carregar_dados()
-proventos = enriquecer_df_proventos(dados["proventos"], dados["ativos_rv"])
+proventos = enriquecer_df_proventos(
+    dados["proventos"], dados["ativos_rv"], dados["carteira_rv"]
+)
+print(proventos)
 pagina_proventos(proventos)
