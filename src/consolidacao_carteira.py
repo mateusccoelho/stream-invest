@@ -100,9 +100,9 @@ def consolidar_carteira() -> dict[str, pd.DataFrame]:
     patrimonio_rv, carteira_rv = consolidar_renda_variavel(transacoes_rv, cotacoes)
     aportes_rf = tratar_aportes_rf(le_dados_excel("Aportes RF"))
     resgates_rf = tratar_resgates_rf(le_dados_excel("Resgates RF"))
-    # patrimonio_rf, carteira_rf = consolidar_renda_fixa(
-    #     aportes_rf, resgate_rf, cotacoes
-    # )
+    patrimonio_rf, carteira_rf = consolidar_renda_fixa(
+        aportes_rf, resgates_rf, cotacoes
+    )
 
     return {
         "proventos": proventos,
@@ -112,8 +112,8 @@ def consolidar_carteira() -> dict[str, pd.DataFrame]:
         "carteira_rv": carteira_rv,
         "aportes_rf": aportes_rf,
         "resgates_rf": resgates_rf,
-        # "patrimonio_rf": patrimonio_rf,
-        # "carteira_rf": carteira_rf,
+        "patrimonio_rf": patrimonio_rf,
+        "carteira_rf": carteira_rf,
     }
 
 
