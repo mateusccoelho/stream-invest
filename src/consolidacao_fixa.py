@@ -1,44 +1,81 @@
-import sys
-
-sys.path.append("..")
 from datetime import date
 
 import pandas as pd
-from sqlalchemy import func
-from sqlalchemy.orm import Session as SessionType
 
-from definicao_tabelas import (
-    Session,
-    Cotacoes,
-    AportesRendaFixa,
-    CarteiraRF,
-    PatrimonioRF,
-    ResgatesRF,
-)
 from utils.calendario import dia_util_anterior, dias_uteis_no_intervalo
 
 
-def obter_serie_variacao(
-    data_inicio: date, data_fim: date, codigo: str
+def consolidar_renda_fixa(
+    aportes: pd.DataFrame, resgates: pd.DataFrame, cotacoes: pd.DataFrame
 ) -> pd.DataFrame:
-    with Session() as session:
-        cotacoes = (
-            session.query(Cotacoes.data, Cotacoes.variacao)
-            .filter(
-                Cotacoes.codigo == codigo,
-                Cotacoes.data >= data_inicio,
-                Cotacoes.data <= data_fim,
-            )
-            .order_by(Cotacoes.data)
-            .all()
+    patrimonio_rf = []
+    status = {"id": [], "status": []}
+
+    for id_titulo in aportes["id"].unique():
+        aporte = aportes.loc[aportes["id"].eq(id_titulo)].iloc[0]
+        resgates_titulo = (
+            resgates.loc[resgates["id"].eq(id_titulo)]
+            .sort_values("data_resgate")
         )
-        cotacoes = pd.DataFrame(cotacoes, columns=["data", "variacao"]).set_index(
-            "data"
-        )["variacao"]
-        return cotacoes
+        
+        valor_titulo = calcula_valor_titulo_periodo(
+            cotacoes,
+            tipo_rentabilidade=aporte["index"],
+            data_inicio=aporte["data_compra"],
+            data_fim=aporte["data_venc"],
+            taxa=aporte["taxa"],
+            valor=aporte["valor"],
+        )
+        valor_titulo["id"] = aporte["id"]
+
+        for _, row in resgates_titulo.iterrows():
+            valor_titulo = valor_titulo.loc[
+                valor_titulo["data"].lt(row["data_resgate"]), :
+            ]
+            ultimo_saldo = valor_titulo.iloc[-1, :]["valor"]
+            saldo_restante = ultimo_saldo - row["valor"]
+
+            if saldo_restante >= 0.01:
+                novos_valores = calcula_valor_titulo_periodo(
+                    cotacoes,
+                    tipo_rentabilidade=aporte["index"],
+                    data_inicio=row["data_resgate"],
+                    data_fim=aporte["data_venc"],
+                    taxa=aporte["taxa"],
+                    valor=saldo_restante,
+                )
+                novos_valores["id"] = aporte["id"]
+                
+                valor_titulo = pd.concat([valor_titulo, novos_valores])
+            else:
+                status["id"].append(aporte["id"])
+                status["status"].append(0)
+
+        patrimonio_rf.append(valor_titulo)
+        
+    patrimonio_rf = pd.concat(patrimonio_rf, ignore_index=True)
+
+    carteira_rf = patrimonio_rf.groupby("id", as_index=False).agg(
+        data_atualizacao=pd.NamedAgg(column="data", aggfunc="max"),
+        saldo=pd.NamedAgg(column="valor", aggfunc="last"),
+        rendimentos_bruto=pd.NamedAgg(column="rendimento", aggfunc="sum"),
+    )
+    resgates.groupby("id", as_index=False).agg(
+        resgates=pd.NamedAgg(column="valor", aggfunc="sum")
+    )
+
+
+def obter_serie_variacao(
+    cotacoes: pd.DataFrame, data_inicio: date, data_fim: date, codigo: str
+) -> pd.Series:
+    mascara_datas = cotacoes["data"].ge(data_inicio) & cotacoes["data"].le(data_fim)
+    mascara_codigo = cotacoes["codigo"].eq(codigo)
+    df = cotacoes.loc[mascara_datas & mascara_codigo, ["data", "variacao"]]
+    return df.set_index("data")["variacao"]
 
 
 def calcula_valor_titulo_periodo(
+    cotacoes: pd.DataFrame,
     tipo_rentabilidade: str,
     data_inicio: date,
     data_fim: date,
@@ -46,13 +83,15 @@ def calcula_valor_titulo_periodo(
     valor: float,
 ) -> pd.DataFrame:
     if tipo_rentabilidade == "CDI":
-        valores_indicador = obter_serie_variacao(data_inicio, data_fim, "CDI")
+        valores_indicador = obter_serie_variacao(cotacoes, data_inicio, data_fim, "CDI")
         fator_diario = valores_indicador * taxa + 1
     elif tipo_rentabilidade == "Pré":
+        data_fim = data_fim if data_fim <= date.today() else date.today()
         dias_uteis = dias_uteis_no_intervalo(data_inicio, data_fim)
-        fator_diario = pd.Series((taxa + 1) ** (1 / 252), index=dias_uteis)
+        fator_diario = pd.Series((taxa + 1) ** (1 / 252), index=dias_uteis, name="variacao")
+        fator_diario.index.name = "data"
     elif tipo_rentabilidade == "IPCA +":
-        valores_indicador = obter_serie_variacao(data_inicio, data_fim, "VNA")
+        valores_indicador = obter_serie_variacao(cotacoes, data_inicio, data_fim, "VNA")
         fator_diario = valores_indicador * ((taxa + 1) ** (1 / 252))
 
     patrimonio = fator_diario.cumprod() * valor
@@ -61,7 +100,7 @@ def calcula_valor_titulo_periodo(
         [patrimonio, rendimento, fator_diario],
         axis=1,
         keys=["valor", "rendimento", "taxa"],
-    )
+    ).reset_index()
 
 
 def adiciona_titulo_rf(
@@ -229,85 +268,3 @@ def adiciona_resgate_rf(
 
         session.commit()
 
-
-def remove_titulo(id_titulo: int):
-    with Session() as session:
-        session.query(AportesRendaFixa).filter(
-            AportesRendaFixa.id_titulo == id_titulo,
-        ).delete()
-        session.query(CarteiraRF).filter(
-            CarteiraRF.id_titulo == id_titulo,
-        ).delete()
-        session.query(PatrimonioRF).filter(
-            PatrimonioRF.id_titulo == id_titulo,
-        ).delete()
-        session.query(ResgatesRF).filter(
-            ResgatesRF.id_titulo == id_titulo,
-        ).delete()
-        session.commit()
-
-
-def atualizar_titulos():
-    with Session() as session:
-        data_max = (
-            session.query(
-                Cotacoes.codigo,
-                func.max(Cotacoes.data),
-            )
-            .filter(Cotacoes.codigo.in_(["VNA", "CDI"]))
-            .group_by(Cotacoes.codigo)
-            .all()
-        )
-        data_max = dict(data_max)
-
-        carteira_info = session.query(CarteiraRF, AportesRendaFixa).filter(
-            CarteiraRF.id_titulo == AportesRendaFixa.id_titulo,
-            CarteiraRF.status == 1,
-        )
-
-        for row in carteira_info:
-            id_titulo = row.CarteiraRF.id_titulo
-            data_atualizacao = row.CarteiraRF.data_atualizacao
-            tipo_rentabilidade = row.AportesRendaFixa.indexador
-            data_vencimento = row.AportesRendaFixa.data_vencimento
-
-            if data_atualizacao >= data_max["VNA"]:
-                continue
-
-            novo_valor = calcula_valor_titulo_periodo(
-                # tipo_rentabilidade=,
-                data_inicio=data_atualizacao,
-                data_fim=data_vencimento,
-                taxa=row.AportesRendaFixa.taxa,
-                valor=row.CarteiraRF.saldo,
-            )
-
-            for index, patr_row in novo_valor.iterrows():
-                patrimonio = PatrimonioRF(
-                    data=index,
-                    id_titulo=id_titulo,
-                    valor=patr_row["valor"],
-                    rendimento=patr_row["rendimento"],
-                    taxa=patr_row["taxa"],
-                )
-                session.add(patrimonio)
-
-            rendimento_antes_do_resgate = (
-                session.query(func.sum(PatrimonioRF.rendimento))
-                .filter(
-                    PatrimonioRF.id_titulo == id_titulo,
-                    PatrimonioRF.data < data_vencimento,
-                )
-                .scalar()
-            )
-
-            session.query(CarteiraRF).filter(
-                CarteiraRF.id_titulo == id_titulo,
-            ).update(
-                {
-                    "data_atualizacao": novo_valor.index[-1],
-                    "saldo": novo_valor["valor"].iloc[-1],
-                    "rendimentos_bruto": rendimento_antes_do_resgate
-                    + novo_valor["rendimento"].sum(),
-                }
-            )

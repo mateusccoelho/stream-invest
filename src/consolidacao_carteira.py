@@ -4,6 +4,7 @@ from datetime import date
 import pandas as pd
 
 from src.consolidacao_variavel import consolidar_renda_variavel
+from src.consolidacao_fixa import consolidar_renda_fixa
 
 CAMINHO_DADOS = Path(__file__).resolve().parent.parent / "dados"
 
@@ -58,18 +59,61 @@ def tratar_transacoes_rv(transacoes_rv: pd.DataFrame) -> pd.DataFrame:
     return transacoes_rv
 
 
+def tratar_aportes_rf(aportes_rf: pd.DataFrame) -> pd.DataFrame:
+    aportes_rf = aportes_rf.rename(
+        columns={
+            "ID": "id",
+            "Valor": "valor",
+            "Corretora": "corretora",
+            "Emissor": "emissor",
+            "Tipo": "tipo",
+            "Forma": "forma",
+            "Data compra": "data_compra",
+            "Data vencimento": "data_venc",
+            "Indexador": "index",
+            "Taxa": "taxa",
+        }
+    )
+    for col in ["data_compra", "data_venc"]:
+        aportes_rf[col] = aportes_rf[col].dt.date
+    
+    return aportes_rf
+
+
+def tratar_resgates_rf(resgate_rf: pd.DataFrame) -> pd.DataFrame:
+    resgate_rf = resgate_rf.rename(
+        columns={
+            "ID": "id",
+            "Valor": "valor",
+            "Data resgate": "data_resgate",
+        }
+    )
+    resgate_rf["data_resgate"] = resgate_rf["data_resgate"].dt.date
+    return resgate_rf
+
+
 def consolidar_carteira() -> dict[str, pd.DataFrame]:
     cotacoes = pd.read_parquet(CAMINHO_DADOS / "cotacoes.parquet")
     proventos = tratar_proventos(le_dados_excel("Proventos RV"))
     ativos_rv = tratar_ativos_rv(le_dados_excel("Ativos RV"))
     transacoes_rv = tratar_transacoes_rv(le_dados_excel("Transações RV"))
     patrimonio_rv, carteira_rv = consolidar_renda_variavel(transacoes_rv, cotacoes)
+    aportes_rf = tratar_aportes_rf(le_dados_excel("Aportes RF"))
+    resgates_rf = tratar_resgates_rf(le_dados_excel("Resgates RF"))
+    # patrimonio_rf, carteira_rf = consolidar_renda_fixa(
+    #     aportes_rf, resgate_rf, cotacoes
+    # )
+
     return {
         "proventos": proventos,
         "ativos_rv": ativos_rv,
         "transacoes_rv": transacoes_rv,
         "patrimonio_rv": patrimonio_rv,
         "carteira_rv": carteira_rv,
+        "aportes_rf": aportes_rf,
+        "resgates_rf": resgates_rf,
+        # "patrimonio_rf": patrimonio_rf,
+        # "carteira_rf": carteira_rf,
     }
 
 
