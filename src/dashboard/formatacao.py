@@ -10,7 +10,7 @@ def formatar_dinheiro(valor: float) -> str:
 
 
 def formatar_porcentagem(valor: float) -> str:
-    return "{:.2f}%".format(valor * 100)
+    return "{:.2f} %".format(valor * 100)
 
 
 def formatar_df_proventos_ativo(df: pd.DataFrame) -> pd.DataFrame:
@@ -25,9 +25,9 @@ def formatar_df_proventos_ativo(df: pd.DataFrame) -> pd.DataFrame:
     for col in ["yoc_periodo"]:
         df[col] = df[col].apply(formatar_porcentagem)
 
-    df = df.filter([
-        "codigo", "tipo_ativo", "total", "yoc_periodo", "qtd", "ultimo_pag"
-    ]).rename(
+    df = df.filter(
+        ["codigo", "tipo_ativo", "total", "yoc_periodo", "qtd", "ultimo_pag"]
+    ).rename(
         columns={
             "codigo": "Código",
             "tipo_ativo": "Tipo",
@@ -52,18 +52,54 @@ def formatar_df_proventos(df: pd.DataFrame) -> pd.DataFrame:
     for col in ["yoc_anualizado"]:
         df[col] = df[col].apply(formatar_porcentagem)
 
-    df = df.filter([
-        "dt_pag", "codigo", "qtd", "valor", "yoc_anualizado", 
-        "total", "tipo"
-    ]).rename(columns={
-        "dt_pag": "Data de pagamento",
-        "tipo": "Tipo",
-        "codigo": "Código",
-        "qtd": "Quantidade",
-        "valor": "Valor",
-        "total": "Total",
-        "yoc_anualizado": "YoC anualizado",
-    })
+    df = df.filter(
+        ["dt_pag", "codigo", "qtd", "valor", "yoc_anualizado", "total", "tipo"]
+    ).rename(
+        columns={
+            "dt_pag": "Data de pagamento",
+            "tipo": "Tipo",
+            "codigo": "Código",
+            "qtd": "Quantidade",
+            "valor": "Valor",
+            "total": "Total",
+            "yoc_anualizado": "YoC anualizado",
+        }
+    )
+    return df
+
+
+def formatar_df_rebalanceamento(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+
+    for col in ["porcent_alvo", "porcent_atual"]:
+        df[col] = df[col].apply(formatar_porcentagem)
+
+    for col in ["valor_alvo", "valor_atual", "delta"]:
+        df[col] = df[col].apply(formatar_dinheiro)
+
+    df["tipo"] = df["tipo"].replace(
+        {
+            "titulos_priv_cdi": "Títulos privados CDI",
+            "fi_infra_cdi": "FI-Infra CDI",
+            "titulos_pub_ipca": "Títulos públicos IPCA",
+            "titulos_priv_ipca": "Títulos privados IPCA",
+            "fi_infra_ipca": "FI-Infra IPCA",
+            "titulos_priv_pre": "Títulos privados prefixados",
+            "acoes_br": "Ações Brasil",
+            "acoes_mundo": "Ações Mundo",
+        }
+    )
+
+    df = df.rename(
+        columns={
+            "tipo": "Classe de ativos",
+            "porcent_alvo": "Porcentagem alvo",
+            "porcent_atual": "Porcentagem atual",
+            "valor_alvo": "Valor alvo",
+            "valor_atual": "Valor atual",
+            "delta": "Investir",
+        }
+    )
     return df
 
 

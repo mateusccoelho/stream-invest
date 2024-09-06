@@ -14,7 +14,7 @@ def consolidar_renda_fixa(
 
     patrimonio_rf = []
     carteira_rf = {
-        "id_titulo": [],
+        "id": [],
         "data_atualizacao": [],
         "saldo": [],
         "resgates": [],
@@ -69,7 +69,7 @@ def consolidar_renda_fixa(
 
         # Definindo informações da carteira
         fim_titulo = 1 if date.today() >= aporte["data_venc"] else 0
-        carteira_rf["id_titulo"].append(aporte["id"])
+        carteira_rf["id"].append(aporte["id"])
         carteira_rf["data_atualizacao"].append(valor_titulo["data"].iloc[-1])
         carteira_rf["saldo"].append(
             0 if resgate_total or fim_titulo else valor_titulo["valor"].iloc[-1]
