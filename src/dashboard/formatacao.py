@@ -205,3 +205,23 @@ def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
         cols_to_show.append("Ativo")
 
     return df[cols_to_show]
+
+
+def formatar_df_resgates(resgates: pd.DataFrame) -> pd.DataFrame:
+    resgates = resgates.copy()
+
+    for col in ["data_resgate"]:
+        resgates[col] = pd.to_datetime(resgates[col]).dt.strftime("%d/%m/%Y")
+
+    for col in ["valor"]:
+        resgates[col] = resgates[col].apply(formatar_dinheiro)
+
+    return (
+        resgates.filter(["data_resgate", "valor"])
+        .rename(
+            columns={
+                "resgates_titulo": "Data",
+                "valor": "Valor",
+            }
+        )
+    )

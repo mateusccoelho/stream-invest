@@ -42,6 +42,6 @@ def plotar_saldo_no_tempo(valores_titulo: pd.DataFrame):
     fig.update_layout(
         xaxis_title="Data",
         yaxis_title="Valor (R$)",
-        title="Marcação na curva",
+        margin=dict(l=20, r=20, t=20, b=20),
     )
     return fig

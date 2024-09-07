@@ -10,7 +10,7 @@ from dashboard.dados import (
     obter_valores_titulo,
     obter_resgates_titulo,
 )
-from src.dashboard.formatacao import formatar_df_renda_fixa
+from src.dashboard.formatacao import formatar_df_renda_fixa, formatar_df_resgates
 from dashboard.graficos import plotar_saldo_no_tempo
 
 
@@ -19,6 +19,7 @@ def pagina_renda_fixa(
     patrimonio_rf: pd.DataFrame,
     resgates_rf: pd.DataFrame,
 ):
+    # Controles
     with st.sidebar:
         filtrar_invativos = st.checkbox("Mostrar inativos", value=False)
         if not filtrar_invativos:
@@ -47,12 +48,19 @@ def pagina_renda_fixa(
         cols[3].metric("Data de vencimento", titulo_selecionado["Vencimento"])
         cols[4].metric("Data de atualização", titulo_selecionado["Atualização"])
 
-        valores_titulo = obter_valores_titulo(patrimonio_rf, id_titulo)
-        st.plotly_chart(plotar_saldo_no_tempo(valores_titulo))
+        st.html("<br>")
+        cols = st.columns([2, 1])
 
-        # resgates_titulo = obter_resgates_titulo(resgates_rf, id_titulo)
-        # st.markdown("### Transações")
-        # st.dataframe(resgates_titulo, hide_index=True)
+        valores_titulo = obter_valores_titulo(patrimonio_rf, id_titulo)
+        cols[0].markdown("##### Marcação na curva")
+        cols[0].plotly_chart(plotar_saldo_no_tempo(valores_titulo))
+
+        cols[1].markdown("##### Resgates")
+        resgates_titulo = obter_resgates_titulo(resgates_rf, id_titulo)
+        if resgates_titulo.empty:
+            cols[1].markdown("Nenhum resgate encontrado.")
+        else:
+            cols[1].dataframe(formatar_df_resgates(resgates_titulo), hide_index=True)
 
 
 st.set_page_config(
