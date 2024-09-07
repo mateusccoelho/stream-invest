@@ -1,6 +1,5 @@
 from datetime import date, timedelta
 import sys
-
 sys.path.append("../../")
 
 import streamlit as st
@@ -60,7 +59,7 @@ def pagina_proventos(proventos: pd.DataFrame):
 st.set_page_config(
     page_title="Proventos",
     page_icon=":moneybag:",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="expanded",
 )
 
@@ -68,5 +67,4 @@ dados = carregar_dados()
 proventos = enriquecer_df_proventos(
     dados["proventos"], dados["ativos_rv"], dados["carteira_rv"]
 )
-print(proventos)
 pagina_proventos(proventos)

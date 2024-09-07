@@ -1,6 +1,4 @@
-from datetime import date, timedelta
 import sys
-
 sys.path.append("../../")
 
 import streamlit as st
@@ -15,8 +13,6 @@ from src.dashboard.formatacao import (
     formatar_df_rebalanceamento,
     formatar_dinheiro,
 )
-
-# from src.dashboard.graficos import plotar_proventos
 
 
 def pagina_rebalanceamento(carteira_rf: pd.DataFrame, carteira_rv: pd.DataFrame):
@@ -46,7 +42,7 @@ def pagina_rebalanceamento(carteira_rf: pd.DataFrame, carteira_rv: pd.DataFrame)
 st.set_page_config(
     page_title="Rebalanceamento",
     page_icon=":moneybag:",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="expanded",
 )
 

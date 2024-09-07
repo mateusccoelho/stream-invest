@@ -1,5 +1,4 @@
 import locale
-
 locale.setlocale(locale.LC_ALL, "pt_BR")
 
 import pandas as pd
@@ -106,30 +105,32 @@ def formatar_df_rebalanceamento(df: pd.DataFrame) -> pd.DataFrame:
 def formatar_df_renda_fixa(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
     df = df.copy()
 
-    for col in ["data_compra", "data_vencimento", "data_atualizacao"]:
+    for col in ["data_compra", "data_venc", "data_atualizacao"]:
         df[col] = pd.to_datetime(df[col])
 
-    df = df.sort_values("data_vencimento").reset_index()
+    df = df.sort_values("data_venc")
 
-    for col in ["data_compra", "data_vencimento", "data_atualizacao"]:
+    # Esse tratamento separado é necessário pois não pode ser executado antes da 
+    # ordenação por data de vencimento.
+    for col in ["data_compra", "data_venc", "data_atualizacao"]:
         df[col] = df[col].dt.strftime("%d/%m/%Y")
 
     for col in ["taxa", "retorno"]:
-        df[col] = df[col].apply(lambda x: "{:.2f}".format(x * 100)) + "%"
+        df[col] = df[col].apply(formatar_porcentagem)
     df["status"] = df["status"].map({1: "Sim", 0: "Não"})
 
-    for col in ["valor_aplicado", "saldo", "rendimentos_bruto", "resgates"]:
+    for col in ["valor", "saldo", "rendimentos_bruto", "resgates"]:
         df[col] = df[col].apply(formatar_dinheiro)
 
-    df = df.rename(
+    df = df.reset_index().rename(
         columns={
-            "id_titulo": "ID",
+            "id": "ID",
             "tipo": "Tipo",
             "emissor": "Emissor",
-            "indexador": "Forma",
+            "index": "Forma",
             "taxa": "Taxa",
-            "data_vencimento": "Vencimento",
-            "valor_aplicado": "Investido",
+            "data_venc": "Vencimento",
+            "valor": "Investido",
             "saldo": "Saldo",
             "rendimentos_bruto": "Rendimentos",
             "status": "Ativo",
@@ -158,7 +159,7 @@ def formatar_df_renda_fixa(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
     if inativos:
         cols_to_show.append("Ativo")
 
-    return df[cols_to_show]
+    return df.filter(cols_to_show)
 
 
 def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> pd.DataFrame:

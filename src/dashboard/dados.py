@@ -14,6 +14,27 @@ def carregar_dados() -> dict[str, pd.DataFrame]:
 
 
 @st.cache_resource
+def enriquecer_df_renda_fixa(
+    carteira_rf: pd.DataFrame, 
+    aportes_rf: pd.DataFrame
+) -> pd.DataFrame:
+    df = carteira_rf.merge(aportes_rf, on="id", how="left")
+    df["retorno"] = df["rendimentos_bruto"] / df["valor"]
+    return df
+
+
+def obter_valores_titulo(patrimonio_rf: pd.DataFrame, id_titulo: int) -> pd.DataFrame:
+    return (
+        patrimonio_rf.loc[patrimonio_rf["id"].eq(id_titulo)]
+        .set_index("data")
+    )
+
+
+def obter_resgates_titulo(resgates_rf: pd.DataFrame, id_titulo: int) -> pd.DataFrame:
+    return resgates_rf.loc[resgates_rf["id"].eq(id_titulo)]
+
+
+@st.cache_resource
 def agrupar_proventos_por_ativo(proventos: pd.DataFrame) -> pd.DataFrame:
     proventos_ativo = (
         proventos.groupby(["codigo", "tipo_ativo", "preco_medio"])
