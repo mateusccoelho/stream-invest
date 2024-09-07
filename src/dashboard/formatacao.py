@@ -163,48 +163,36 @@ def formatar_df_renda_fixa(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
 
 
 def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
-    df = df.copy().reset_index().sort_values("benchmark")
+    df = df.copy().reset_index().sort_values("bench")
 
-    for col in ["data_atualizacao"]:
+    for col in ["data"]:
         df[col] = pd.to_datetime(df[col]).dt.strftime("%d/%m/%Y")
 
-    df["status"] = df["status"].map({1: "Sim", 0: "Não"})
+    for col in ["preco_medio", "rendimento_total", "patrimonio"]:
+        df[col] = df[col].apply(formatar_dinheiro)
 
-    for col in ["preco_medio", "rendimento_hoje", "rendimento_total", "patrimonio"]:
-        df[col] = df[col].apply(
-            lambda x: locale.currency(x, grouping=True, symbol="R$")
-        )
-
-    df = df.rename(
-        columns={
+    return (
+        df.rename(columns={
             "preco_medio": "Preço médio",
-            "rendimento_hoje": "Variação hoje",
             "rendimento_total": "Variação total",
             "patrimonio": "Patrimônio",
-            "status": "Ativo",
-            "data_atualizacao": "Atualização",
+            "data": "Atualização",
             "quantidade": "Quantidade",
-            "benchmark": "Benchmark",
+            "bench": "Benchmark",
             "codigo": "Código",
             "tipo": "Tipo",
-        }
+        })
+        .filter([
+            "Código",
+            "Tipo",
+            "Benchmark",
+            "Preço médio",
+            "Quantidade",
+            "Patrimônio",
+            "Variação total",
+            "Atualização",
+        ])
     )
-
-    cols_to_show = [
-        "Código",
-        "Tipo",
-        "Benchmark",
-        "Preço médio",
-        "Quantidade",
-        "Patrimônio",
-        "Variação hoje",
-        "Variação total",
-        "Atualização",
-    ]
-    if inativos:
-        cols_to_show.append("Ativo")
-
-    return df[cols_to_show]
 
 
 def formatar_df_resgates(resgates: pd.DataFrame) -> pd.DataFrame:

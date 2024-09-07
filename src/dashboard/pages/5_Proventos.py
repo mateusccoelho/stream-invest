@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 import sys
-sys.path.append("../../")
+sys.path.append("..")
 
 import streamlit as st
 import pandas as pd

@@ -11,7 +11,7 @@ from dashboard.dados import (
     obter_resgates_titulo,
 )
 from src.dashboard.formatacao import formatar_df_renda_fixa, formatar_df_resgates
-from dashboard.graficos import plotar_saldo_no_tempo
+from src.dashboard.graficos import plotar_saldo_no_tempo
 
 
 def pagina_renda_fixa(

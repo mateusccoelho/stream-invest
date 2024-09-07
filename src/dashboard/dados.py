@@ -23,6 +23,13 @@ def enriquecer_df_renda_fixa(
     return df
 
 
+@st.cache_data
+def enriquecer_df_renda_var(
+    ativos_rv: pd.DataFrame, carteira_rv: pd.DataFrame
+) -> pd.DataFrame:
+    return ativos_rv.merge(carteira_rv, on="codigo", how="inner")
+
+
 def obter_valores_titulo(patrimonio_rf: pd.DataFrame, id_titulo: int) -> pd.DataFrame:
     return (
         patrimonio_rf.loc[patrimonio_rf["id"].eq(id_titulo)]
