@@ -18,7 +18,7 @@ def pagina_renda_variavel(renda_var_df: pd.DataFrame):
     df_formatado = formatar_df_renda_var(renda_var_df, inativos)
 
     st.subheader("Lista de ativos")
-    st.dataframe(df_formatado, hide_index=True)
+    st.dataframe(df_formatado, hide_index=True, use_container_width=True)
 
 
 st.set_page_config(
