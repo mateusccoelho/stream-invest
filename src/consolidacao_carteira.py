@@ -72,6 +72,7 @@ def tratar_aportes_rf(aportes_rf: pd.DataFrame) -> pd.DataFrame:
             "Data vencimento": "data_venc",
             "Indexador": "index",
             "Taxa": "taxa",
+            "Reserva": "reserva",
         }
     )
     for col in ["data_compra", "data_venc"]:

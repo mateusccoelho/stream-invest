@@ -3,13 +3,14 @@ locale.setlocale(locale.LC_ALL, "pt_BR")
 
 import pandas as pd
 
+from src.dashboard.constants import CATEGORIAS_ATIVOS
 
 def formatar_dinheiro(valor: float) -> str:
     return locale.currency(valor, grouping=True, symbol="R$")
 
 
 def formatar_porcentagem(valor: float) -> str:
-    return "{:.2f} %".format(valor * 100)
+    return "{:.2f}%".format(valor * 100)
 
 
 def formatar_df_proventos_ativo(df: pd.DataFrame) -> pd.DataFrame:
@@ -76,18 +77,7 @@ def formatar_df_rebalanceamento(df: pd.DataFrame) -> pd.DataFrame:
     for col in ["valor_alvo", "valor_atual", "delta"]:
         df[col] = df[col].apply(formatar_dinheiro)
 
-    df["tipo"] = df["tipo"].replace(
-        {
-            "titulos_priv_cdi": "Títulos privados CDI",
-            "fi_infra_cdi": "FI-Infra CDI",
-            "titulos_pub_ipca": "Títulos públicos IPCA",
-            "titulos_priv_ipca": "Títulos privados IPCA",
-            "fi_infra_ipca": "FI-Infra IPCA",
-            "titulos_priv_pre": "Títulos privados prefixados",
-            "acoes_br": "Ações Brasil",
-            "acoes_mundo": "Ações Mundo",
-        }
-    )
+    df["tipo"] = df["tipo"].replace(CATEGORIAS_ATIVOS)
 
     df = df.rename(
         columns={
@@ -168,12 +158,28 @@ def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
     for col in ["data"]:
         df[col] = pd.to_datetime(df[col]).dt.strftime("%d/%m/%Y")
 
-    for col in ["preco_medio", "rendimento_total", "patrimonio"]:
+    for col in ["preco_medio", "preco_atual", "rendimento_total", "patrimonio"]:
         df[col] = df[col].apply(formatar_dinheiro)
 
+    for col in ["retorno"]:
+        df[col] = df[col].apply(formatar_porcentagem)
+
     return (
-        df.rename(columns={
+        df.filter([
+            "codigo",
+            "tipo",
+            "bench",
+            "preco_medio",
+            "preco_atual",
+            "quantidade",
+            "patrimonio",
+            "rendimento_total",
+            "retorno",
+            "data",
+        ])
+        .rename(columns={
             "preco_medio": "Preço médio",
+            "preco_atual": "Preço atual",
             "rendimento_total": "Variação total",
             "patrimonio": "Patrimônio",
             "data": "Atualização",
@@ -181,17 +187,8 @@ def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
             "bench": "Benchmark",
             "codigo": "Código",
             "tipo": "Tipo",
+            "retorno": "Retorno",
         })
-        .filter([
-            "Código",
-            "Tipo",
-            "Benchmark",
-            "Preço médio",
-            "Quantidade",
-            "Patrimônio",
-            "Variação total",
-            "Atualização",
-        ])
     )
 
 
