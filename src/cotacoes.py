@@ -63,8 +63,8 @@ class Cotacoes:
         ]
 
     def atualizar_indicadores(self, dias: int = 180):
-        """Verifica se há cotações faltantes dentro de um período de tempo (padrão 60 dias).
-        Se sim, serão extraídas e adicionadas ao dataframe.
+        """Verifica se há cotações faltantes dentro de um período de tempo (padrão 60
+        dias). Se sim, serão extraídas e adicionadas ao dataframe.
         """
 
         data_fim = date.today()
@@ -95,7 +95,8 @@ class Cotacoes:
                 )
             else:
                 print(
-                    f"{nome_indicador} tem dados faltantes mas não é possível preenchê-los"
+                    f"{nome_indicador} tem dados faltantes mas não é possível "
+                    "preenchê-los."
                 )
 
         self._calcular_variacoes_faltantes()

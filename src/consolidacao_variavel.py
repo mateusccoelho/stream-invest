@@ -1,5 +1,4 @@
 from datetime import date
-from typing import List
 
 import pandas as pd
 
@@ -85,10 +84,6 @@ def consolidar_renda_variavel(
     # anterior e subtrair do atual? No caso de vendas, eu uso o preço médio ou
     # o preço do dia? Porque preciso calcular o rendimento?
     patrimonio_rv["patrimonio"] = patrimonio_rv["qtd_acum"] * patrimonio_rv["valor"]
-    # patrimonio_rv["patrimonio_ant"] = patrimonio_rv.groupby("codigo")["patrimonio"].shift(1).fillna(0)
-    # patrimonio_rv["rendimento"] = (
-    #     patrimonio_rv["patrimonio"] - patrimonio_rv["patrimonio_ant"]
-    # )
 
     patrimonio_rv = patrimonio_rv.drop(
         columns=["variacao", "valor", "qtd", "qtd_sinal", "valor_trans"]

@@ -68,13 +68,4 @@ def plotar_patrimonio_total(patrimonio: pd.DataFrame):
         )
 
     fig.update_layout(hovermode="x unified")
-
-    # fig = px.area(
-    #     patrimonio,
-    #     x="data",
-    #     y="saldo",
-    #     color="classe",
-    #     labels={"data": "Data", "saldo": "Patrimônio (R$", "classe": "Classe de Ativo"},
-    # )
-    # fig.update_layout(hovermode="x unified")
     return fig

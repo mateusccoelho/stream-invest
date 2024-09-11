@@ -45,7 +45,7 @@ class IMAB5(IndicadorAbstrato):
                 date_format="%d/%m/%Y",
                 parse_dates=["Data de Referência"],
             )
-        except:
+        except Exception:
             return None
 
         imab5 = df.loc[df["Índice"].eq("IMA-B 5"), "Número Índice"].iloc[0]
@@ -77,7 +77,7 @@ class VNA(IndicadorAbstrato):
                 thousands=".",
                 skiprows=7,
             )
-        except:
+        except Exception:
             return None
 
         vna = df.loc[df["Titulo"].eq("NTN-B"), "VNA"].iloc[0]
