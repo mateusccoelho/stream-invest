@@ -90,10 +90,11 @@ def enriquecer_dfs_carteira(
     return carteira_rf, carteira_rv
 
 
-@st.cache_resource
 def criar_df_rebalanceamento(
     carteira_rf: pd.DataFrame,
     carteira_rv: pd.DataFrame,
+    aporte_geral: float,
+    aportes_vals: list[float],
 ) -> pd.DataFrame:
     df = pd.DataFrame(
         {
@@ -136,8 +137,15 @@ def criar_df_rebalanceamento(
         }
     )
     df["porcent_atual"] = df["valor_atual"] / df["valor_atual"].sum()
-    df["valor_alvo"] = df["porcent_alvo"] * df["valor_atual"].sum()
-    df["delta"] = df["valor_alvo"] - df["valor_atual"]
+    
+    total_com_aportes = df["valor_atual"].sum() + aporte_geral + sum(aportes_vals)
+    df["valor_alvo"] = df["porcent_alvo"] * total_com_aportes
+
+    valor_com_aportes = df["valor_atual"] + pd.Series(aportes_vals)
+    # A lista de aportes individuais tem que estar na mesma ordem da tabela de 
+    # rebalanceamento para que a conta funcione.
+    df["delta"] = df["valor_alvo"] - valor_com_aportes
+    
     return df
 
 
