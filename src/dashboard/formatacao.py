@@ -1,9 +1,11 @@
 import locale
+
 locale.setlocale(locale.LC_ALL, "pt_BR")
 
 import pandas as pd
 
 from src.dashboard.constants import CATEGORIAS_ATIVOS
+
 
 def formatar_dinheiro(valor: float) -> str:
     return locale.currency(valor, grouping=True, symbol="R$")
@@ -100,7 +102,7 @@ def formatar_df_renda_fixa(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
 
     df = df.sort_values("data_venc")
 
-    # Esse tratamento separado é necessário pois não pode ser executado antes da 
+    # Esse tratamento separado é necessário pois não pode ser executado antes da
     # ordenação por data de vencimento.
     for col in ["data_compra", "data_venc", "data_atualizacao"]:
         df[col] = df[col].dt.strftime("%d/%m/%Y")
@@ -164,8 +166,8 @@ def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
     for col in ["retorno"]:
         df[col] = df[col].apply(formatar_porcentagem)
 
-    return (
-        df.filter([
+    return df.filter(
+        [
             "codigo",
             "tipo",
             "bench",
@@ -176,8 +178,9 @@ def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
             "rendimento_total",
             "retorno",
             "data",
-        ])
-        .rename(columns={
+        ]
+    ).rename(
+        columns={
             "preco_medio": "Preço médio",
             "preco_atual": "Preço atual",
             "rendimento_total": "Variação total",
@@ -188,7 +191,7 @@ def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
             "codigo": "Código",
             "tipo": "Tipo",
             "retorno": "Retorno",
-        })
+        }
     )
 
 
@@ -201,12 +204,9 @@ def formatar_df_resgates(resgates: pd.DataFrame) -> pd.DataFrame:
     for col in ["valor"]:
         resgates[col] = resgates[col].apply(formatar_dinheiro)
 
-    return (
-        resgates.filter(["data_resgate", "valor"])
-        .rename(
-            columns={
-                "resgates_titulo": "Data",
-                "valor": "Valor",
-            }
-        )
+    return resgates.filter(["data_resgate", "valor"]).rename(
+        columns={
+            "resgates_titulo": "Data",
+            "valor": "Valor",
+        }
     )

@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("../../")
 
 import pandas as pd
@@ -32,7 +33,7 @@ def mostrar_metricas(metricas: pd.DataFrame):
 
 
 def pagina_patrimonio(
-    renda_fixa_df: pd.DataFrame, 
+    renda_fixa_df: pd.DataFrame,
     renda_var_df: pd.DataFrame,
     patrimonio_total: pd.DataFrame,
 ):
@@ -44,28 +45,22 @@ def pagina_patrimonio(
     st.markdown("### ETFs")
     etfs = renda_var_df.loc[renda_var_df["tipo_ativo"].eq("ETF")]
     mostrar_metricas(calcular_metricas(etfs, "rv"))
-    st.dataframe(
-        formatar_df_renda_var(etfs), 
-        hide_index=True, 
-        use_container_width=True
-    )
+    st.dataframe(formatar_df_renda_var(etfs), hide_index=True, use_container_width=True)
 
     st.markdown("### FI-Infra")
     fiinfra = renda_var_df.loc[renda_var_df["tipo_ativo"].eq("FI-Infra")]
     mostrar_metricas(calcular_metricas(fiinfra, "rv"))
     st.dataframe(
-        formatar_df_renda_var(fiinfra), 
-        hide_index=True, 
-        use_container_width=True
+        formatar_df_renda_var(fiinfra), hide_index=True, use_container_width=True
     )
-    
+
     st.markdown("### Renda fixa")
     df_rf = renda_fixa_df.loc[renda_fixa_df["status"].eq(1)]
     mostrar_metricas(calcular_metricas(df_rf, "rf"))
     st.dataframe(
-        formatar_df_renda_fixa(df_rf, inativos=False), 
-        hide_index=True, 
-        use_container_width=True
+        formatar_df_renda_fixa(df_rf, inativos=False),
+        hide_index=True,
+        use_container_width=True,
     )
 
 
@@ -78,8 +73,7 @@ st.set_page_config(
 
 dados = carregar_dados()
 renda_var_df = enriquecer_df_renda_var(
-    ativos_rv=dados["ativos_rv"], 
-    carteira_rv=dados["carteira_rv"]
+    ativos_rv=dados["ativos_rv"], carteira_rv=dados["carteira_rv"]
 )
 renda_fixa_df = enriquecer_df_renda_fixa(dados["carteira_rf"], dados["aportes_rf"])
 patrimonio_rv = enriquecer_patrimonio_rv(dados["ativos_rv"], dados["patrimonio_rv"])

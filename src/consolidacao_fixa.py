@@ -24,12 +24,11 @@ def consolidar_renda_fixa(
 
     for id_titulo in aportes["id"].unique():
         aporte = aportes.loc[aportes["id"].eq(id_titulo)].iloc[0]
-        resgates_titulo = (
-            resgates.loc[resgates["id"].eq(id_titulo)]
-            .sort_values("data_resgate")
+        resgates_titulo = resgates.loc[resgates["id"].eq(id_titulo)].sort_values(
+            "data_resgate"
         )
         resgate_total = False
-        
+
         valor_titulo = calcula_valor_titulo_periodo(
             cotacoes,
             tipo_rentabilidade=aporte["index"],
@@ -60,7 +59,7 @@ def consolidar_renda_fixa(
                     valor=saldo_restante,
                 )
                 novos_valores["id"] = aporte["id"]
-                
+
                 valor_titulo = pd.concat([valor_titulo, novos_valores])
             else:
                 resgate_total = True
@@ -79,7 +78,7 @@ def consolidar_renda_fixa(
         )
         carteira_rf["rendimentos_bruto"].append(valor_titulo["rendimento"].sum())
         carteira_rf["status"].append(0 if resgate_total or fim_titulo else 1)
-        
+
     patrimonio_rf = pd.concat(patrimonio_rf, ignore_index=True)
     carteira_rf = pd.DataFrame(carteira_rf)
     return patrimonio_rf, carteira_rf
@@ -88,8 +87,8 @@ def consolidar_renda_fixa(
 def obter_serie_variacao(
     cotacoes: pd.DataFrame, data_inicio: date, data_fim: date, codigo: str
 ) -> pd.Series:
-    # O filtro lt na data_fim é porque a data de vencimento é como se fosse um dia de 
-    # resgate, ou seja, o valor que será devolvido é o do dia anterior. Por isso, só 
+    # O filtro lt na data_fim é porque a data de vencimento é como se fosse um dia de
+    # resgate, ou seja, o valor que será devolvido é o do dia anterior. Por isso, só
     # faz sentido calcular o patrimônio até o dia anterior.
     mascara_datas = cotacoes["data"].ge(data_inicio) & cotacoes["data"].lt(data_fim)
     mascara_codigo = cotacoes["codigo"].eq(codigo)
@@ -112,7 +111,9 @@ def calcula_valor_titulo_periodo(
         data_fim = data_fim if data_fim <= date.today() else date.today()
         dias_uteis = dias_uteis_no_intervalo(data_inicio, data_fim)
 
-        fator_diario = pd.Series((taxa + 1) ** (1 / 252), index=dias_uteis, name="variacao")
+        fator_diario = pd.Series(
+            (taxa + 1) ** (1 / 252), index=dias_uteis, name="variacao"
+        )
         fator_diario.index.name = "data"
     elif tipo_rentabilidade == "IPCA +":
         valores_indicador = obter_serie_variacao(cotacoes, data_inicio, data_fim, "VNA")

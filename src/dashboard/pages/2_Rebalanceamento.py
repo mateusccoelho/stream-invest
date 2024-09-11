@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("../../")
 
 import streamlit as st
@@ -29,10 +30,14 @@ def pagina_rebalanceamento(carteira_rf: pd.DataFrame, carteira_rv: pd.DataFrame)
     )
 
     aportes_cols = {
-        "Títulos privados CDI": 0, "FI-Infra CDI": 0,
-        "Títulos públicos IPCA": 1, "Títulos privados IPCA": 1,
-        "FI-Infra IPCA": 1, "Títulos privados pré": 2,
-        "Ações Brasil": 3, "Ações Mundo": 3,
+        "Títulos privados CDI": 0,
+        "FI-Infra CDI": 0,
+        "Títulos públicos IPCA": 1,
+        "Títulos privados IPCA": 1,
+        "FI-Infra IPCA": 1,
+        "Títulos privados pré": 2,
+        "Ações Brasil": 3,
+        "Ações Mundo": 3,
     }
     aportes_vals = []
     with st.expander("Aportes individuais"):

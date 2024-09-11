@@ -52,24 +52,23 @@ def plotar_saldo_no_tempo(valores_titulo: pd.DataFrame):
 def plotar_patrimonio_total(patrimonio: pd.DataFrame):
     patrimonio["classe"] = patrimonio["classe"].replace(CATEGORIAS_ATIVOS)
     classes = (
-        patrimonio.groupby("classe")["saldo"]
-        .last()
-        .sort_values(ascending=False)
-        .index
+        patrimonio.groupby("classe")["saldo"].last().sort_values(ascending=False).index
     )
 
     fig = go.Figure()
     for indexador in classes:
-        df_indexador = patrimonio[patrimonio['classe'] == indexador]
-        fig.add_trace(go.Scatter(
-            x=df_indexador['data'], 
-            y=df_indexador['saldo'], 
-            name=indexador,
-            stackgroup='1',
-        ))
-    
-    fig.update_layout(hovermode='x unified')
-    
+        df_indexador = patrimonio[patrimonio["classe"] == indexador]
+        fig.add_trace(
+            go.Scatter(
+                x=df_indexador["data"],
+                y=df_indexador["saldo"],
+                name=indexador,
+                stackgroup="1",
+            )
+        )
+
+    fig.update_layout(hovermode="x unified")
+
     # fig = px.area(
     #     patrimonio,
     #     x="data",

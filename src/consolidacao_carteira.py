@@ -27,9 +27,7 @@ def tratar_proventos(proventos: pd.DataFrame) -> pd.DataFrame:
     ).sort_values(["dt_pag", "codigo"], ascending=False)
     proventos["dt_pag"] = proventos["dt_pag"].dt.date
     proventos["total"] = (proventos["qtd"] * proventos["valor"]).round(2)
-    proventos["anomes"] = proventos["dt_pag"].apply(
-        lambda x: date(x.year, x.month, 1)
-    )
+    proventos["anomes"] = proventos["dt_pag"].apply(lambda x: date(x.year, x.month, 1))
     return proventos
 
 
@@ -44,17 +42,21 @@ def tratar_ativos_rv(ativos_rv: pd.DataFrame) -> pd.DataFrame:
 
 
 def tratar_transacoes_rv(transacoes_rv: pd.DataFrame) -> pd.DataFrame:
-    transacoes_rv = transacoes_rv.rename(
-        columns={
-            "Data": "data",
-            "Código": "codigo",
-            "Operação C/V": "tipo",
-            "Quantidade": "qtd",
-            "Preço": "preco",
-            "Corretora": "corretora",
-            "Taxas": "taxas",
-        }
-    ).sort_values(["codigo", "data"]).reset_index(drop=True)
+    transacoes_rv = (
+        transacoes_rv.rename(
+            columns={
+                "Data": "data",
+                "Código": "codigo",
+                "Operação C/V": "tipo",
+                "Quantidade": "qtd",
+                "Preço": "preco",
+                "Corretora": "corretora",
+                "Taxas": "taxas",
+            }
+        )
+        .sort_values(["codigo", "data"])
+        .reset_index(drop=True)
+    )
     transacoes_rv["data"] = transacoes_rv["data"].dt.date
     return transacoes_rv
 
@@ -77,7 +79,7 @@ def tratar_aportes_rf(aportes_rf: pd.DataFrame) -> pd.DataFrame:
     )
     for col in ["data_compra", "data_venc"]:
         aportes_rf[col] = aportes_rf[col].dt.date
-    
+
     return aportes_rf
 
 

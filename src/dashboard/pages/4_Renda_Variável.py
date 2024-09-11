@@ -9,7 +9,7 @@ from dashboard.dados import carregar_dados, enriquecer_df_renda_var
 from dashboard.formatacao import formatar_df_renda_var
 
 
-def pagina_renda_variavel(renda_var_df: pd.DataFrame):    
+def pagina_renda_variavel(renda_var_df: pd.DataFrame):
     with st.sidebar:
         inativos = st.checkbox("Mostrar inativos", value=False)
         if not inativos:
@@ -30,7 +30,6 @@ st.set_page_config(
 
 dados = carregar_dados()
 renda_var_df = enriquecer_df_renda_var(
-    ativos_rv=dados["ativos_rv"], 
-    carteira_rv=dados["carteira_rv"]
+    ativos_rv=dados["ativos_rv"], carteira_rv=dados["carteira_rv"]
 )
 pagina_renda_variavel(renda_var_df)

@@ -15,8 +15,7 @@ def carregar_dados() -> dict[str, pd.DataFrame]:
 
 @st.cache_resource
 def enriquecer_df_renda_fixa(
-    carteira_rf: pd.DataFrame, 
-    aportes_rf: pd.DataFrame
+    carteira_rf: pd.DataFrame, aportes_rf: pd.DataFrame
 ) -> pd.DataFrame:
     df = carteira_rf.merge(aportes_rf, on="id", how="left")
     df["retorno"] = df["rendimentos_bruto"] / df["valor"]
@@ -28,16 +27,13 @@ def enriquecer_df_renda_var(
     ativos_rv: pd.DataFrame, carteira_rv: pd.DataFrame
 ) -> pd.DataFrame:
     df = ativos_rv.merge(carteira_rv, on="codigo", how="inner")
-    df["retorno"] = df["rendimento_total"] / (df["preco_medio"] * df["qtd"]) 
-    df["preco_atual"] = df["patrimonio"] / df["qtd"] 
-    return df 
+    df["retorno"] = df["rendimento_total"] / (df["preco_medio"] * df["qtd"])
+    df["preco_atual"] = df["patrimonio"] / df["qtd"]
+    return df
 
 
 def obter_valores_titulo(patrimonio_rf: pd.DataFrame, id_titulo: int) -> pd.DataFrame:
-    return (
-        patrimonio_rf.loc[patrimonio_rf["id"].eq(id_titulo)]
-        .set_index("data")
-    )
+    return patrimonio_rf.loc[patrimonio_rf["id"].eq(id_titulo)].set_index("data")
 
 
 def obter_resgates_titulo(resgates_rf: pd.DataFrame, id_titulo: int) -> pd.DataFrame:
@@ -137,15 +133,15 @@ def criar_df_rebalanceamento(
         }
     )
     df["porcent_atual"] = df["valor_atual"] / df["valor_atual"].sum()
-    
+
     total_com_aportes = df["valor_atual"].sum() + aporte_geral + sum(aportes_vals)
     df["valor_alvo"] = df["porcent_alvo"] * total_com_aportes
 
     valor_com_aportes = df["valor_atual"] + pd.Series(aportes_vals)
-    # A lista de aportes individuais tem que estar na mesma ordem da tabela de 
+    # A lista de aportes individuais tem que estar na mesma ordem da tabela de
     # rebalanceamento para que a conta funcione.
     df["delta"] = df["valor_alvo"] - valor_com_aportes
-    
+
     return df
 
 
@@ -154,9 +150,7 @@ def enriquecer_patrimonio_rf(
     aportes_rf: pd.DataFrame, patrimonio_rf: pd.DataFrame
 ) -> pd.DataFrame:
     return patrimonio_rf.merge(
-        aportes_rf[["id", "index", "emissor"]],
-        on="id", 
-        how="left"
+        aportes_rf[["id", "index", "emissor"]], on="id", how="left"
     )
 
 
@@ -164,9 +158,7 @@ def enriquecer_patrimonio_rf(
 def enriquecer_patrimonio_rv(
     ativos_rv: pd.DataFrame, patrimonio_rv: pd.DataFrame
 ) -> pd.DataFrame:
-    return patrimonio_rv.merge(
-        ativos_rv, on="codigo", how="left"
-    )
+    return patrimonio_rv.merge(ativos_rv, on="codigo", how="left")
 
 
 @st.cache_resource
@@ -188,43 +180,46 @@ def calcular_metricas(df: pd.DataFrame, tipo: str) -> pd.DataFrame:
 def calcular_df_patrimonio_total(
     patrimonio_rf: pd.DataFrame, patrimonio_rv: pd.DataFrame
 ) -> pd.DataFrame:
-    patrimonio_rf_agg = (
-        patrimonio_rf.groupby(["data", "index"], as_index=False)
-        .agg(saldo=pd.NamedAgg(column="valor", aggfunc="sum"))
+    patrimonio_rf_agg = patrimonio_rf.groupby(["data", "index"], as_index=False).agg(
+        saldo=pd.NamedAgg(column="valor", aggfunc="sum")
     )
 
-    patrimonio_rf_agg["classe"] = patrimonio_rf_agg["index"].replace({
-        "IPCA +": "titulos_priv_ipca",
-        "Pré": "titulos_priv_pre",
-        "CDI": "titulos_priv_cdi",
-    })
-
-    patrimonio_rv_agg = (
-        patrimonio_rv.groupby(["data", "tipo_ativo", "bench"], as_index=False)
-        .agg(saldo=pd.NamedAgg(column="patrimonio", aggfunc="sum"))
+    patrimonio_rf_agg["classe"] = patrimonio_rf_agg["index"].replace(
+        {
+            "IPCA +": "titulos_priv_ipca",
+            "Pré": "titulos_priv_pre",
+            "CDI": "titulos_priv_cdi",
+        }
     )
+
+    patrimonio_rv_agg = patrimonio_rv.groupby(
+        ["data", "tipo_ativo", "bench"], as_index=False
+    ).agg(saldo=pd.NamedAgg(column="patrimonio", aggfunc="sum"))
 
     patrimonio_rv_agg["classe"] = ""
     patrimonio_rv_agg.loc[
-        patrimonio_rv_agg["tipo_ativo"].eq("FI-Infra") & patrimonio_rv_agg["bench"].eq("CDI"),
-        "classe"
+        patrimonio_rv_agg["tipo_ativo"].eq("FI-Infra")
+        & patrimonio_rv_agg["bench"].eq("CDI"),
+        "classe",
     ] = "fi_infra_cdi"
     patrimonio_rv_agg.loc[
-        patrimonio_rv_agg["tipo_ativo"].eq("ETF") & patrimonio_rv_agg["bench"].eq("IMAB 5"),
-        "classe"
+        patrimonio_rv_agg["tipo_ativo"].eq("ETF")
+        & patrimonio_rv_agg["bench"].eq("IMAB 5"),
+        "classe",
     ] = "titulos_pub_ipca"
     patrimonio_rv_agg.loc[
-        patrimonio_rv_agg["tipo_ativo"].eq("FI-Infra") & patrimonio_rv_agg["bench"].eq("IMAB 5"),
-        "classe"
+        patrimonio_rv_agg["tipo_ativo"].eq("FI-Infra")
+        & patrimonio_rv_agg["bench"].eq("IMAB 5"),
+        "classe",
     ] = "fi_infra_ipca"
     patrimonio_rv_agg.loc[
-        patrimonio_rv_agg["tipo_ativo"].eq("ETF") & patrimonio_rv_agg["bench"].eq("IBOV"),
-        "classe"
+        patrimonio_rv_agg["tipo_ativo"].eq("ETF")
+        & patrimonio_rv_agg["bench"].eq("IBOV"),
+        "classe",
     ] = "acoes"
 
     filter_list = ["data", "classe", "saldo"]
-    patrimonio_total = pd.concat([
-        patrimonio_rf_agg[filter_list], 
-        patrimonio_rv_agg[filter_list]
-    ])
+    patrimonio_total = pd.concat(
+        [patrimonio_rf_agg[filter_list], patrimonio_rv_agg[filter_list]]
+    )
     return patrimonio_total
