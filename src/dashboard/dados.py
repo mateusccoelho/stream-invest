@@ -110,7 +110,7 @@ def criar_df_rebalanceamento(
             "porcent_alvo": [0.3, 0.1, 0.15, 0.1, 0.1, 0.05, 0.1, 0.1],
             "valor_atual": [
                 carteira_rf.loc[
-                    carteira_rf["index"].eq("CDI") & carteira_rf["reserva"],
+                    carteira_rf["index"].eq("CDI") & (~carteira_rf["reserva"]),
                     "saldo",
                 ].sum(),
                 carteira_rv.loc[
