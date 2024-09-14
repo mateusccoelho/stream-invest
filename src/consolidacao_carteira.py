@@ -89,6 +89,7 @@ def tratar_resgates_rf(resgate_rf: pd.DataFrame) -> pd.DataFrame:
             "ID": "id",
             "Valor": "valor",
             "Data resgate": "data_resgate",
+            "Final": "final",
         }
     )
     resgate_rf["data_resgate"] = resgate_rf["data_resgate"].dt.date

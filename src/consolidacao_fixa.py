@@ -46,10 +46,11 @@ def consolidar_renda_fixa(
             valor_titulo = valor_titulo.loc[
                 valor_titulo["data"].lt(row["data_resgate"]), :
             ]
-            ultimo_saldo = valor_titulo.iloc[-1, :]["valor"]
-            saldo_restante = ultimo_saldo - row["valor"]
 
-            if saldo_restante >= 0.01:
+            if not row["final"]:
+                ultimo_saldo = valor_titulo.iloc[-1, :]["valor"]
+                saldo_restante = ultimo_saldo - row["valor"]
+                
                 novos_valores = calcula_valor_titulo_periodo(
                     cotacoes,
                     tipo_rentabilidade=aporte["index"],
