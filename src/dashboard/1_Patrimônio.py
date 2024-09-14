@@ -40,7 +40,11 @@ def pagina_patrimonio(
     st.markdown("# Patrimônio")
 
     st.markdown("### Evolução")
-    st.plotly_chart(plotar_patrimonio_total(patrimonio_total), use_container_width=True)
+    por_ativo = st.checkbox("Mostrar por ativo")
+    st.plotly_chart(
+        plotar_patrimonio_total(patrimonio_total, por_ativo=por_ativo), 
+        use_container_width=True
+    )
 
     st.markdown("### ETFs")
     etfs = renda_var_df.loc[renda_var_df["tipo_ativo"].eq("ETF")]
