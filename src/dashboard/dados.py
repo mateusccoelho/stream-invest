@@ -166,12 +166,13 @@ def calcular_metricas(df: pd.DataFrame, tipo: str) -> pd.DataFrame:
     if tipo == "rv":
         patrimonio = df["patrimonio"].sum()
         investido = (df["preco_medio"] * df["qtd"]).sum()
+        retorno_valor = patrimonio - investido
     elif tipo == "rf":
         patrimonio = df["saldo"].sum()
         investido = df["valor"].sum()
-
-    retorno_valor = patrimonio - investido
-    retorno_porcent = (patrimonio - investido) / investido
+        retorno_valor = df["rendimentos_bruto"].sum()
+    
+    retorno_porcent = retorno_valor / investido
     qtd = df.shape[0]
     return patrimonio, retorno_valor, retorno_porcent, qtd
 
