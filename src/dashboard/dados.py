@@ -250,3 +250,47 @@ def calcular_mov_mensal(
     movimentacoes = pd.concat([aportes_rf_mensal, resgates_rf_mensal, transacoes_rv_mensal])
     movimentacoes = movimentacoes.groupby(["data", "tipo"], as_index=False)["valor_trans"].sum()
     return movimentacoes
+
+
+@st.cache_resource
+def criar_df_taxas(df_fixa: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def aliquota_ir(x: int):
+        if x <= 180:
+            return 0.225
+        elif x <= 360:
+            return 0.2
+        elif x <= 720:
+            return 0.175
+        else:
+            return 0.15
+
+    df_taxas = df_fixa.loc[
+        df_fixa["status"].eq(1) & df_fixa["index"].eq("CDI") & df_fixa["reserva"].eq(False),
+        ["id", "tipo", "data_compra", "data_venc", "taxa", "valor"]
+    ].copy()
+
+    for col in ["data_compra", "data_venc"]:
+        df_taxas[col] = pd.to_datetime(df_taxas[col])
+
+    df_taxas["prazo_dias"] = (df_taxas["data_venc"] - df_taxas["data_compra"]).dt.days
+    df_taxas["aliquota_ir"] = df_taxas["prazo_dias"].apply(aliquota_ir)
+    df_taxas["faixa_prazo"] = pd.cut(
+        df_taxas["prazo_dias"],
+        bins=[0, 180, 360, 720, 9999],
+        labels=["até 180 dias", "181 a 360 dias", "361 a 720 dias", "mais de 720 dias"],
+    )
+    df_taxas.loc[df_taxas["tipo"].isin(["LCA", "LCI"]), "aliquota_ir"] = 0
+    df_taxas["taxa_desc"] = df_taxas["taxa"] * (1 - df_taxas["aliquota_ir"])
+    df_taxas["valor_taxa"] = df_taxas["valor"] * df_taxas["taxa_desc"]
+
+    df_taxas_agg = df_taxas.groupby("faixa_prazo", as_index=False).agg(
+        valor=pd.NamedAgg(column="valor", aggfunc="sum"),
+        valor_taxa=pd.NamedAgg(column="valor_taxa", aggfunc="sum"),
+    )
+    df_taxas_agg["proporcao"] = df_taxas_agg["valor"] / df_taxas_agg["valor"].sum()
+    df_taxas_agg["taxa_media"] = df_taxas_agg["valor_taxa"] / df_taxas_agg["valor"]
+    df_taxas_agg["taxa_alvo"] = df_taxas_agg["taxa_media"] / (1 - pd.Series([0.225, 0.2, 0.175, 0.15]))
+
+    df_taxas = df_taxas.drop(columns=["aliquota_ir", "data_compra", "data_venc", "valor_taxa"])
+    df_taxas_agg = df_taxas_agg.drop(columns=["valor_taxa"])
+    return df_taxas, df_taxas_agg

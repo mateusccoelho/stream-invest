@@ -5,13 +5,19 @@ sys.path.append("..")
 import pandas as pd
 import streamlit as st
 
-from dashboard.dados import (
+from src.dashboard.dados import (
     carregar_dados,
     enriquecer_df_renda_fixa,
     obter_valores_titulo,
     obter_resgates_titulo,
+    criar_df_taxas,
 )
-from src.dashboard.formatacao import formatar_df_renda_fixa, formatar_df_resgates
+from src.dashboard.formatacao import (
+    formatar_df_renda_fixa, 
+    formatar_df_resgates,
+    formatar_df_taxas,
+    formatar_df_taxas_agg,
+)
 from src.dashboard.graficos import plotar_saldo_no_tempo
 
 
@@ -19,6 +25,8 @@ def pagina_renda_fixa(
     renda_fixa_df: pd.DataFrame,
     patrimonio_rf: pd.DataFrame,
     resgates_rf: pd.DataFrame,
+    df_taxas: pd.DataFrame,
+    df_taxas_agg: pd.DataFrame,
 ):
     # Controles
     with st.sidebar:
@@ -36,6 +44,13 @@ def pagina_renda_fixa(
         df_rf_formatado, hide_index=True, use_container_width=True
     )
     
+    st.markdown("### Estudo de taxas")
+    cols = st.columns([3, 2])
+    cols[0].markdown("##### Detalhes")
+    cols[0].dataframe(formatar_df_taxas(df_taxas), hide_index=True, use_container_width=True)
+    cols[1].markdown("##### Agregado")
+    cols[1].dataframe(formatar_df_taxas_agg(df_taxas_agg), hide_index=True, use_container_width=True)
+
     st.markdown("### Rentabilidade")
     if df_rf_editado[""].sum() == 0:
         st.markdown("Selecione um título para ver a rentabilidade.")
@@ -78,4 +93,5 @@ st.set_page_config(
 
 dados = carregar_dados()
 renda_fixa_df = enriquecer_df_renda_fixa(dados["carteira_rf"], dados["aportes_rf"])
-pagina_renda_fixa(renda_fixa_df, dados["patrimonio_rf"], dados["resgates_rf"])
+df_taxas, df_taxas_agg = criar_df_taxas(renda_fixa_df)
+pagina_renda_fixa(renda_fixa_df, dados["patrimonio_rf"], dados["resgates_rf"], df_taxas, df_taxas_agg)

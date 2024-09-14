@@ -234,3 +234,48 @@ def formatar_transacoes_rv(df: pd.DataFrame) -> pd.DataFrame:
             "corretora": "Corretora",
         })
     )
+
+
+def formatar_df_taxas(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+
+    for col in ["taxa", "taxa_desc"]:
+        df[col] = df[col].apply(formatar_porcentagem)
+
+    for col in ["valor"]:
+        df[col] = df[col].apply(formatar_dinheiro)
+
+    return (
+        df.filter([
+            "id", "tipo", "faixa_prazo", "taxa", "taxa_desc", "valor"
+        ])
+        .rename(
+            columns={
+                "id": "ID",
+                "tipo": "Tipo",
+                "taxa": "Taxa",
+                "faixa_prazo": "Prazo",
+                "taxa_desc": "Taxa descontada",
+                "valor": "Valor",
+            }
+        )
+    )
+
+
+
+def formatar_df_taxas_agg(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+
+    for col in ["proporcao", "taxa_media", "taxa_alvo"]:
+        df[col] = df[col].apply(formatar_porcentagem)
+
+    for col in ["valor"]:
+        df[col] = df[col].apply(formatar_dinheiro)
+    
+    return df.rename(columns={
+        "faixa_prazo": "Prazo",
+        "proporcao": "Proporção",
+        "taxa_media": "Taxa média",
+        "valor": "Valor",
+        "taxa_alvo": "Taxa alvo",
+    })
