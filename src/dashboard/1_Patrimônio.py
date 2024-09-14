@@ -13,6 +13,7 @@ from src.dashboard.dados import (
     enriquecer_patrimonio_rv,
     calcular_metricas,
     calcular_df_patrimonio_total,
+    calcular_mov_mensal,
 )
 from src.dashboard.formatacao import (
     formatar_df_renda_var,
@@ -20,7 +21,7 @@ from src.dashboard.formatacao import (
     formatar_dinheiro,
     formatar_porcentagem,
 )
-from src.dashboard.graficos import plotar_patrimonio_total
+from src.dashboard.graficos import plotar_patrimonio_total, plotar_movimentacoes
 
 
 def mostrar_metricas(metricas: pd.DataFrame):
@@ -36,6 +37,7 @@ def pagina_patrimonio(
     renda_fixa_df: pd.DataFrame,
     renda_var_df: pd.DataFrame,
     patrimonio_total: pd.DataFrame,
+    movimentacoes: pd.DataFrame,
 ):
     st.markdown("# Patrimônio")
 
@@ -67,6 +69,12 @@ def pagina_patrimonio(
         use_container_width=True,
     )
 
+    st.markdown("### Movimentações")
+    st.plotly_chart(
+        plotar_movimentacoes(movimentacoes),
+        use_container_width=True
+    )
+
 
 st.set_page_config(
     page_title="Renda Fixa",
@@ -83,8 +91,12 @@ renda_fixa_df = enriquecer_df_renda_fixa(dados["carteira_rf"], dados["aportes_rf
 patrimonio_rv = enriquecer_patrimonio_rv(dados["ativos_rv"], dados["patrimonio_rv"])
 patrimonio_rf = enriquecer_patrimonio_rf(dados["aportes_rf"], dados["patrimonio_rf"])
 patrimonio_total = calcular_df_patrimonio_total(patrimonio_rf, patrimonio_rv)
+movimentacoes = calcular_mov_mensal(
+    dados["aportes_rf"], dados["resgates_rf"], dados["transacoes_rv"]
+)
 pagina_patrimonio(
     renda_fixa_df,
     renda_var_df,
     patrimonio_total,
+    movimentacoes,
 )

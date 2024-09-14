@@ -87,3 +87,31 @@ def plotar_patrimonio_total(patrimonio: pd.DataFrame, por_ativo=False):
         hovermode="x unified",
     )
     return fig
+
+
+def plotar_movimentacoes(movimentacoes: pd.DataFrame):
+    movimentacoes["tipo"] = movimentacoes["tipo"].replace(
+        {"compra": "Compra", "venda": "Venda"}
+    )
+
+    fig = px.bar(
+        movimentacoes,
+        x="data",
+        y="valor_trans",
+        color="tipo",
+        barmode='group',
+        labels={"data": "Data", "valor_trans": "Valor (R$)", "tipo": "Operação"},
+    )
+    fig.update_traces(hovertemplate=None)
+    fig.update_xaxes(tickformat="%m/%y", dtick="M2")
+    fig.update_layout(
+        margin=dict(l=20, r=20, t=20, b=20),
+        hovermode="x unified",
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.01
+        )
+    )
+    return fig

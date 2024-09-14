@@ -223,3 +223,29 @@ def calcular_df_patrimonio_total(
         [patrimonio_rf_agg[filter_list], patrimonio_rv_agg[filter_list]]
     )
     return patrimonio_total
+
+
+@st.cache_resource
+def calcular_mov_mensal(
+    aportes_rf: pd.DataFrame, resgates_rf: pd.DataFrame, transacoes_rv: pd.DataFrame
+):
+    aportes_rf["data_compra"] = pd.to_datetime(aportes_rf["data_compra"])
+    aportes_rf["data_compra"] = aportes_rf["data_compra"].dt.to_period("M").dt.to_timestamp()
+    aportes_rf_mensal = aportes_rf.groupby("data_compra", as_index=False)["valor"].sum()
+    aportes_rf_mensal.insert(1, "tipo", "compra")
+    aportes_rf_mensal = aportes_rf_mensal.rename(columns={"data_compra": "data", "valor": "valor_trans"})
+    
+    resgates_rf["data_resgate"] = pd.to_datetime(resgates_rf["data_resgate"])
+    resgates_rf["data_resgate"] = resgates_rf["data_resgate"].dt.to_period("M").dt.to_timestamp()
+    resgates_rf_mensal = resgates_rf.groupby("data_resgate", as_index=False)["valor"].sum()
+    resgates_rf_mensal.insert(1, "tipo", "venda")
+    resgates_rf_mensal = resgates_rf_mensal.rename(columns={"data_resgate": "data", "valor": "valor_trans"})
+
+    transacoes_rv["data"] = pd.to_datetime(transacoes_rv["data"])
+    transacoes_rv["data"] = transacoes_rv["data"].dt.to_period("M").dt.to_timestamp()
+    transacoes_rv_mensal = transacoes_rv.groupby(["data", "tipo"], as_index=False)["valor_trans"].sum()
+    transacoes_rv_mensal["tipo"] = transacoes_rv_mensal["tipo"].replace({"C": "compra", "V": "venda"})
+
+    movimentacoes = pd.concat([aportes_rf_mensal, resgates_rf_mensal, transacoes_rv_mensal])
+    movimentacoes = movimentacoes.groupby(["data", "tipo"], as_index=False)["valor_trans"].sum()
+    return movimentacoes
