@@ -206,7 +206,31 @@ def formatar_df_resgates(resgates: pd.DataFrame) -> pd.DataFrame:
 
     return resgates.filter(["data_resgate", "valor"]).rename(
         columns={
-            "resgates_titulo": "Data",
+            "data_resgate": "Data",
             "valor": "Valor",
         }
+    )
+
+
+def formatar_transacoes_rv(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+
+    for col in ["data"]:
+        df[col] = pd.to_datetime(df[col]).dt.strftime("%d/%m/%Y")
+
+    for col in ["preco", "taxas"]:
+        df[col] = df[col].apply(formatar_dinheiro)
+
+    df["tipo"] = df["tipo"].replace({"C": "Compra", "V": "Venda"})
+
+    return (
+        df.filter(["data", "tipo", "qtd", "preco", "taxas", "corretora"])
+        .rename(columns={
+            "data": "Data",
+            "tipo": "Operação",
+            "qtd": "Quantidade",
+            "preco": "Preço",
+            "taxas": "Taxa total",
+            "corretora": "Corretora",
+        })
     )

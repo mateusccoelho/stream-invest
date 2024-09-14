@@ -25,19 +25,24 @@ def pagina_renda_fixa(
         filtrar_invativos = st.checkbox("Mostrar inativos", value=False)
         if not filtrar_invativos:
             renda_fixa_df = renda_fixa_df[renda_fixa_df["status"].eq(1)]
-        id_titulo = st.selectbox(
-            "ID do título", ["Selecionar"] + renda_fixa_df["id"].unique().tolist()
-        )
 
     df_rf_formatado = formatar_df_renda_fixa(renda_fixa_df, filtrar_invativos)
 
-    st.subheader("Lista de títulos")
-    st.dataframe(df_rf_formatado, hide_index=True, use_container_width=True)
+    st.markdown("# Renda Fixa")
 
-    st.subheader("Rentabilidade")
-    if id_titulo == "Selecionar":
+    st.markdown("### Lista de títulos")
+    df_rf_formatado.insert(0, "", False)
+    df_rf_editado = st.data_editor(
+        df_rf_formatado, hide_index=True, use_container_width=True
+    )
+    
+    st.markdown("### Rentabilidade")
+    if df_rf_editado[""].sum() == 0:
         st.markdown("Selecione um título para ver a rentabilidade.")
+    elif df_rf_editado[""].sum() > 1:
+        st.markdown("Selecione apenas um título.")        
     else:
+        id_titulo = df_rf_editado.loc[df_rf_editado[""], "ID"].iloc[0]
         titulo_selecionado = df_rf_formatado.loc[
             df_rf_formatado["ID"].eq(id_titulo), :
         ].iloc[0]
