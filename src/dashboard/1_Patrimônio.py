@@ -44,8 +44,8 @@ def pagina_patrimonio(
     st.markdown("### Evolução")
     por_ativo = st.checkbox("Mostrar por ativo")
     st.plotly_chart(
-        plotar_patrimonio_total(patrimonio_total, por_ativo=por_ativo), 
-        use_container_width=True
+        plotar_patrimonio_total(patrimonio_total, por_ativo=por_ativo),
+        use_container_width=True,
     )
 
     st.markdown("### ETFs")
@@ -70,10 +70,7 @@ def pagina_patrimonio(
     )
 
     st.markdown("### Movimentações")
-    st.plotly_chart(
-        plotar_movimentacoes(movimentacoes),
-        use_container_width=True
-    )
+    st.plotly_chart(plotar_movimentacoes(movimentacoes), use_container_width=True)
 
 
 st.set_page_config(

@@ -223,16 +223,15 @@ def formatar_transacoes_rv(df: pd.DataFrame) -> pd.DataFrame:
 
     df["tipo"] = df["tipo"].replace({"C": "Compra", "V": "Venda"})
 
-    return (
-        df.filter(["data", "tipo", "qtd", "preco", "taxas", "corretora"])
-        .rename(columns={
+    return df.filter(["data", "tipo", "qtd", "preco", "taxas", "corretora"]).rename(
+        columns={
             "data": "Data",
             "tipo": "Operação",
             "qtd": "Quantidade",
             "preco": "Preço",
             "taxas": "Taxa total",
             "corretora": "Corretora",
-        })
+        }
     )
 
 
@@ -245,22 +244,18 @@ def formatar_df_taxas(df: pd.DataFrame) -> pd.DataFrame:
     for col in ["valor"]:
         df[col] = df[col].apply(formatar_dinheiro)
 
-    return (
-        df.filter([
-            "id", "tipo", "faixa_prazo", "taxa", "taxa_desc", "valor"
-        ])
-        .rename(
-            columns={
-                "id": "ID",
-                "tipo": "Tipo",
-                "taxa": "Taxa",
-                "faixa_prazo": "Prazo",
-                "taxa_desc": "Taxa descontada",
-                "valor": "Valor",
-            }
-        )
+    return df.filter(
+        ["id", "tipo", "faixa_prazo", "taxa", "taxa_desc", "valor"]
+    ).rename(
+        columns={
+            "id": "ID",
+            "tipo": "Tipo",
+            "taxa": "Taxa",
+            "faixa_prazo": "Prazo",
+            "taxa_desc": "Taxa descontada",
+            "valor": "Valor",
+        }
     )
-
 
 
 def formatar_df_taxas_agg(df: pd.DataFrame) -> pd.DataFrame:
@@ -271,11 +266,13 @@ def formatar_df_taxas_agg(df: pd.DataFrame) -> pd.DataFrame:
 
     for col in ["valor"]:
         df[col] = df[col].apply(formatar_dinheiro)
-    
-    return df.rename(columns={
-        "faixa_prazo": "Prazo",
-        "proporcao": "Proporção",
-        "taxa_media": "Taxa média",
-        "valor": "Valor",
-        "taxa_alvo": "Taxa alvo",
-    })
+
+    return df.rename(
+        columns={
+            "faixa_prazo": "Prazo",
+            "proporcao": "Proporção",
+            "taxa_media": "Taxa média",
+            "valor": "Valor",
+            "taxa_alvo": "Taxa alvo",
+        }
+    )

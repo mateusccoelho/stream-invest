@@ -171,7 +171,7 @@ def calcular_metricas(df: pd.DataFrame, tipo: str) -> pd.DataFrame:
         patrimonio = df["saldo"].sum()
         investido = df["valor"].sum()
         retorno_valor = df["rendimentos_bruto"].sum()
-    
+
     retorno_porcent = retorno_valor / investido
     qtd = df.shape[0]
     return patrimonio, retorno_valor, retorno_porcent, qtd
@@ -231,24 +231,42 @@ def calcular_mov_mensal(
     aportes_rf: pd.DataFrame, resgates_rf: pd.DataFrame, transacoes_rv: pd.DataFrame
 ):
     aportes_rf["data_compra"] = pd.to_datetime(aportes_rf["data_compra"])
-    aportes_rf["data_compra"] = aportes_rf["data_compra"].dt.to_period("M").dt.to_timestamp()
+    aportes_rf["data_compra"] = (
+        aportes_rf["data_compra"].dt.to_period("M").dt.to_timestamp()
+    )
     aportes_rf_mensal = aportes_rf.groupby("data_compra", as_index=False)["valor"].sum()
     aportes_rf_mensal.insert(1, "tipo", "compra")
-    aportes_rf_mensal = aportes_rf_mensal.rename(columns={"data_compra": "data", "valor": "valor_trans"})
-    
+    aportes_rf_mensal = aportes_rf_mensal.rename(
+        columns={"data_compra": "data", "valor": "valor_trans"}
+    )
+
     resgates_rf["data_resgate"] = pd.to_datetime(resgates_rf["data_resgate"])
-    resgates_rf["data_resgate"] = resgates_rf["data_resgate"].dt.to_period("M").dt.to_timestamp()
-    resgates_rf_mensal = resgates_rf.groupby("data_resgate", as_index=False)["valor"].sum()
+    resgates_rf["data_resgate"] = (
+        resgates_rf["data_resgate"].dt.to_period("M").dt.to_timestamp()
+    )
+    resgates_rf_mensal = resgates_rf.groupby("data_resgate", as_index=False)[
+        "valor"
+    ].sum()
     resgates_rf_mensal.insert(1, "tipo", "venda")
-    resgates_rf_mensal = resgates_rf_mensal.rename(columns={"data_resgate": "data", "valor": "valor_trans"})
+    resgates_rf_mensal = resgates_rf_mensal.rename(
+        columns={"data_resgate": "data", "valor": "valor_trans"}
+    )
 
     transacoes_rv["data"] = pd.to_datetime(transacoes_rv["data"])
     transacoes_rv["data"] = transacoes_rv["data"].dt.to_period("M").dt.to_timestamp()
-    transacoes_rv_mensal = transacoes_rv.groupby(["data", "tipo"], as_index=False)["valor_trans"].sum()
-    transacoes_rv_mensal["tipo"] = transacoes_rv_mensal["tipo"].replace({"C": "compra", "V": "venda"})
+    transacoes_rv_mensal = transacoes_rv.groupby(["data", "tipo"], as_index=False)[
+        "valor_trans"
+    ].sum()
+    transacoes_rv_mensal["tipo"] = transacoes_rv_mensal["tipo"].replace(
+        {"C": "compra", "V": "venda"}
+    )
 
-    movimentacoes = pd.concat([aportes_rf_mensal, resgates_rf_mensal, transacoes_rv_mensal])
-    movimentacoes = movimentacoes.groupby(["data", "tipo"], as_index=False)["valor_trans"].sum()
+    movimentacoes = pd.concat(
+        [aportes_rf_mensal, resgates_rf_mensal, transacoes_rv_mensal]
+    )
+    movimentacoes = movimentacoes.groupby(["data", "tipo"], as_index=False)[
+        "valor_trans"
+    ].sum()
     return movimentacoes
 
 
@@ -265,8 +283,10 @@ def criar_df_taxas(df_fixa: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
             return 0.15
 
     df_taxas = df_fixa.loc[
-        df_fixa["status"].eq(1) & df_fixa["index"].eq("CDI") & df_fixa["reserva"].eq(False),
-        ["id", "tipo", "data_compra", "data_venc", "taxa", "valor"]
+        df_fixa["status"].eq(1)
+        & df_fixa["index"].eq("CDI")
+        & df_fixa["reserva"].eq(False),
+        ["id", "tipo", "data_compra", "data_venc", "taxa", "valor"],
     ].copy()
 
     for col in ["data_compra", "data_venc"]:
@@ -289,8 +309,12 @@ def criar_df_taxas(df_fixa: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     )
     df_taxas_agg["proporcao"] = df_taxas_agg["valor"] / df_taxas_agg["valor"].sum()
     df_taxas_agg["taxa_media"] = df_taxas_agg["valor_taxa"] / df_taxas_agg["valor"]
-    df_taxas_agg["taxa_alvo"] = df_taxas_agg["taxa_media"] / (1 - pd.Series([0.225, 0.2, 0.175, 0.15]))
+    df_taxas_agg["taxa_alvo"] = df_taxas_agg["taxa_media"] / (
+        1 - pd.Series([0.225, 0.2, 0.175, 0.15])
+    )
 
-    df_taxas = df_taxas.drop(columns=["aliquota_ir", "data_compra", "data_venc", "valor_taxa"])
+    df_taxas = df_taxas.drop(
+        columns=["aliquota_ir", "data_compra", "data_venc", "valor_taxa"]
+    )
     df_taxas_agg = df_taxas_agg.drop(columns=["valor_taxa"])
     return df_taxas, df_taxas_agg

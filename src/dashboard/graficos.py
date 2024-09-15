@@ -54,7 +54,7 @@ def plotar_patrimonio_total(patrimonio: pd.DataFrame, por_ativo=False) -> go.Fig
     patrimonio["data"] = pd.to_datetime(patrimonio["data"])
     patrimonio["data"] = patrimonio["data"].dt.to_period("M").dt.to_timestamp()
     patr_mensal = patrimonio.groupby(["data", "classe"], as_index=False)["saldo"].last()
-    
+
     if por_ativo:
         fig = px.bar(
             patr_mensal,
@@ -64,12 +64,7 @@ def plotar_patrimonio_total(patrimonio: pd.DataFrame, por_ativo=False) -> go.Fig
             labels={"data": "Data", "saldo": "Saldo (R$)", "classe": "Classe"},
             hover_data={"saldo": ":.2f"},
         )
-        fig.update_layout(legend=dict(
-            yanchor="top",
-            y=0.99,
-            xanchor="left",
-            x=0.01
-        ))
+        fig.update_layout(legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
     else:
         patr_mensal_total = patr_mensal.groupby("data", as_index=False).sum()
         fig = px.line(
@@ -79,7 +74,7 @@ def plotar_patrimonio_total(patrimonio: pd.DataFrame, por_ativo=False) -> go.Fig
             labels={"data": "Data", "saldo": "Saldo (R$)"},
             markers=True,
         )
-        
+
     fig.update_traces(hovertemplate=None)
     fig.update_xaxes(tickformat="%m/%y", dtick="M2")
     fig.update_layout(
@@ -99,7 +94,7 @@ def plotar_movimentacoes(movimentacoes: pd.DataFrame) -> go.Figure:
         x="data",
         y="valor_trans",
         color="tipo",
-        barmode='group',
+        barmode="group",
         labels={"data": "Data", "valor_trans": "Valor (R$)", "tipo": "Operação"},
     )
     fig.update_traces(hovertemplate=None)
@@ -107,18 +102,17 @@ def plotar_movimentacoes(movimentacoes: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         margin=dict(l=20, r=20, t=20, b=20),
         hovermode="x unified",
-        legend=dict(
-            yanchor="top",
-            y=0.99,
-            xanchor="left",
-            x=0.01
-        )
+        legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
     )
     return fig
 
 
 def plotar_emissores(df: pd.DataFrame) -> go.Figure:
-    emissores = df.groupby("emissor", as_index=False)["saldo"].sum().sort_values("saldo", ascending=False)
+    emissores = (
+        df.groupby("emissor", as_index=False)["saldo"]
+        .sum()
+        .sort_values("saldo", ascending=False)
+    )
     fig = px.bar(
         emissores,
         x="emissor",
@@ -127,10 +121,10 @@ def plotar_emissores(df: pd.DataFrame) -> go.Figure:
         text_auto=True,
     )
     fig.update_traces(
-        textfont_size=15, 
+        textfont_size=15,
         textangle=0,
         cliponaxis=False,
-        textposition="outside", 
-        texttemplate = "%{y:.2f}",
+        textposition="outside",
+        texttemplate="%{y:.2f}",
     )
     return fig

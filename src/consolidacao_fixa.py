@@ -50,7 +50,7 @@ def consolidar_renda_fixa(
             if not row["final"]:
                 ultimo_saldo = valor_titulo.iloc[-1, :]["valor"]
                 saldo_restante = ultimo_saldo - row["valor"]
-                
+
                 novos_valores = calcula_valor_titulo_periodo(
                     cotacoes,
                     tipo_rentabilidade=aporte["index"],
