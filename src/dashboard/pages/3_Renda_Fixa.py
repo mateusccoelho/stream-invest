@@ -18,7 +18,7 @@ from src.dashboard.formatacao import (
     formatar_df_taxas,
     formatar_df_taxas_agg,
 )
-from src.dashboard.graficos import plotar_saldo_no_tempo
+from src.dashboard.graficos import plotar_saldo_no_tempo, plotar_emissores
 
 
 def pagina_renda_fixa(
@@ -50,6 +50,9 @@ def pagina_renda_fixa(
     cols[0].dataframe(formatar_df_taxas(df_taxas), hide_index=True, use_container_width=True)
     cols[1].markdown("##### Agregado")
     cols[1].dataframe(formatar_df_taxas_agg(df_taxas_agg), hide_index=True, use_container_width=True)
+
+    st.markdown("### Emissores")
+    st.plotly_chart(plotar_emissores(renda_fixa_df), use_container_width=True)
 
     st.markdown("### Rentabilidade")
     if df_rf_editado[""].sum() == 0:

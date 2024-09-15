@@ -9,7 +9,7 @@ from src.dashboard.constants import CATEGORIAS_ATIVOS
 locale.setlocale(locale.LC_ALL, "pt_BR")
 
 
-def plotar_proventos(proventos: pd.DataFrame, por_ativo=False):
+def plotar_proventos(proventos: pd.DataFrame, por_ativo=False) -> go.Figure:
     colunas_agrup = ["anomes"]
     if por_ativo:
         colunas_agrup.append("codigo")
@@ -34,7 +34,7 @@ def plotar_proventos(proventos: pd.DataFrame, por_ativo=False):
     return fig
 
 
-def plotar_saldo_no_tempo(valores_titulo: pd.DataFrame):
+def plotar_saldo_no_tempo(valores_titulo: pd.DataFrame) -> go.Figure:
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -49,7 +49,7 @@ def plotar_saldo_no_tempo(valores_titulo: pd.DataFrame):
     return fig
 
 
-def plotar_patrimonio_total(patrimonio: pd.DataFrame, por_ativo=False):
+def plotar_patrimonio_total(patrimonio: pd.DataFrame, por_ativo=False) -> go.Figure:
     patrimonio["classe"] = patrimonio["classe"].replace(CATEGORIAS_ATIVOS)
     patrimonio["data"] = pd.to_datetime(patrimonio["data"])
     patrimonio["data"] = patrimonio["data"].dt.to_period("M").dt.to_timestamp()
@@ -89,7 +89,7 @@ def plotar_patrimonio_total(patrimonio: pd.DataFrame, por_ativo=False):
     return fig
 
 
-def plotar_movimentacoes(movimentacoes: pd.DataFrame):
+def plotar_movimentacoes(movimentacoes: pd.DataFrame) -> go.Figure:
     movimentacoes["tipo"] = movimentacoes["tipo"].replace(
         {"compra": "Compra", "venda": "Venda"}
     )
@@ -113,5 +113,24 @@ def plotar_movimentacoes(movimentacoes: pd.DataFrame):
             xanchor="left",
             x=0.01
         )
+    )
+    return fig
+
+
+def plotar_emissores(df: pd.DataFrame) -> go.Figure:
+    emissores = df.groupby("emissor", as_index=False)["saldo"].sum().sort_values("saldo", ascending=False)
+    fig = px.bar(
+        emissores,
+        x="emissor",
+        y="saldo",
+        labels={"saldo": "Saldo", "emissor": "Emissor"},
+        text_auto=True,
+    )
+    fig.update_traces(
+        textfont_size=15, 
+        textangle=0,
+        cliponaxis=False,
+        textposition="outside", 
+        texttemplate = "%{y:.2f}",
     )
     return fig
