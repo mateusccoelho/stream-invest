@@ -331,7 +331,6 @@ def calcular_metricas_trans_rv(df: pd.DataFrame) -> tuple[int, date, float, floa
 
 
 def calcular_metricas_mov(df: pd.DataFrame) -> tuple[float, float, float]:
-    print(df)
     vlr_compras = df.loc[df["tipo"].eq("compra"), "valor_trans"].sum()
     vlr_vendas = df.loc[df["tipo"].eq("venda"), "valor_trans"].sum()
     aportes = vlr_compras - vlr_vendas
