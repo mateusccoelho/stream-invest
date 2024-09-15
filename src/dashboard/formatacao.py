@@ -1,10 +1,10 @@
 import locale
 
-locale.setlocale(locale.LC_ALL, "pt_BR")
-
 import pandas as pd
 
 from src.dashboard.constants import CATEGORIAS_ATIVOS
+
+locale.setlocale(locale.LC_ALL, "pt_BR")
 
 
 def formatar_dinheiro(valor: float) -> str:
