@@ -11,14 +11,17 @@ from src.dashboard.dados import (
     obter_valores_titulo,
     obter_resgates_titulo,
     criar_df_taxas,
+    calcular_metricas_rend,
 )
 from src.dashboard.formatacao import (
     formatar_df_renda_fixa,
     formatar_df_resgates,
     formatar_df_taxas,
     formatar_df_taxas_agg,
+    formatar_dinheiro,
 )
 from src.dashboard.graficos import plotar_saldo_no_tempo, plotar_emissores
+from src.dashboard.layout import mostrar_metricas
 
 
 def pagina_renda_fixa(
@@ -37,14 +40,14 @@ def pagina_renda_fixa(
     df_rf_formatado = formatar_df_renda_fixa(renda_fixa_df, filtrar_invativos)
 
     st.markdown("# Renda Fixa")
+    mostrar_metricas(calcular_metricas_rend(renda_fixa_df, "rf"))
 
-    st.markdown("### Lista de títulos")
     df_rf_formatado.insert(0, "", False)
     df_rf_editado = st.data_editor(
         df_rf_formatado, hide_index=True, use_container_width=True
     )
 
-    st.markdown("### Estudo de taxas")
+    st.markdown("### Estudo de taxas CDI")
     cols = st.columns([3, 2])
     cols[0].markdown("##### Detalhes")
     cols[0].dataframe(
@@ -56,6 +59,12 @@ def pagina_renda_fixa(
     )
 
     st.markdown("### Emissores")
+    cols = st.columns(4)
+    cols[0].metric("Quantidade", renda_fixa_df["emissor"].nunique())
+    cols[1].metric(
+        "Exposição máxima",
+        formatar_dinheiro(renda_fixa_df.groupby("emissor")["saldo"].sum().max()),
+    )
     st.plotly_chart(plotar_emissores(renda_fixa_df), use_container_width=True)
 
     st.markdown("### Rentabilidade")

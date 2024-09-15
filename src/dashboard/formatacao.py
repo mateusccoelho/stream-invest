@@ -223,8 +223,11 @@ def formatar_transacoes_rv(df: pd.DataFrame) -> pd.DataFrame:
 
     df["tipo"] = df["tipo"].replace({"C": "Compra", "V": "Venda"})
 
-    return df.filter(["data", "tipo", "qtd", "preco", "taxas", "corretora"]).rename(
+    return df.filter(
+        ["codigo", "data", "tipo", "qtd", "preco", "taxas", "corretora"]
+    ).rename(
         columns={
+            "codigo": "Código",
             "data": "Data",
             "tipo": "Operação",
             "qtd": "Quantidade",

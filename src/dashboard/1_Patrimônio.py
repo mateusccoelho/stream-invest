@@ -11,9 +11,11 @@ from src.dashboard.dados import (
     enriquecer_df_renda_fixa,
     enriquecer_patrimonio_rf,
     enriquecer_patrimonio_rv,
-    calcular_metricas,
+    calcular_metricas_rend,
     calcular_df_patrimonio_total,
     calcular_mov_mensal,
+    calcular_metricas_mov,
+    calcular_metricas_patr,
 )
 from src.dashboard.formatacao import (
     formatar_df_renda_var,
@@ -22,15 +24,15 @@ from src.dashboard.formatacao import (
     formatar_porcentagem,
 )
 from src.dashboard.graficos import plotar_patrimonio_total, plotar_movimentacoes
+from src.dashboard.layout import mostrar_metricas
 
 
-def mostrar_metricas(metricas: pd.DataFrame):
-    titulo_metricas = ["Patrimônio", "Retorno", "Retorno (%)", "Quantidade de ativos"]
+def mostrar_metricas_patr(metricas: tuple[float, float, float]):
     cols = st.columns(4)
-    cols[0].metric(titulo_metricas[0], formatar_dinheiro(metricas[0]))
-    cols[1].metric(titulo_metricas[1], formatar_dinheiro(metricas[1]))
-    cols[2].metric(titulo_metricas[2], formatar_porcentagem(metricas[2]))
-    cols[3].metric(titulo_metricas[3], metricas[3])
+    cols[0].metric("Patrimônio atual", formatar_dinheiro(metricas[0]))
+    cols[1].metric("Crescimento total", formatar_porcentagem(metricas[1]))
+    cols[2].metric("Crescimento total anual", formatar_porcentagem(metricas[2]))
+    cols[3].metric("Crescimento 1 ano", formatar_porcentagem(metricas[3]))
 
 
 def pagina_patrimonio(
@@ -40,8 +42,8 @@ def pagina_patrimonio(
     movimentacoes: pd.DataFrame,
 ):
     st.markdown("# Patrimônio")
+    mostrar_metricas_patr(calcular_metricas_patr(patrimonio_total))
 
-    st.markdown("### Evolução")
     por_ativo = st.checkbox("Mostrar por ativo")
     st.plotly_chart(
         plotar_patrimonio_total(patrimonio_total, por_ativo=por_ativo),
@@ -50,19 +52,19 @@ def pagina_patrimonio(
 
     st.markdown("### ETFs")
     etfs = renda_var_df.loc[renda_var_df["tipo_ativo"].eq("ETF")]
-    mostrar_metricas(calcular_metricas(etfs, "rv"))
+    mostrar_metricas(calcular_metricas_rend(etfs, "rv"))
     st.dataframe(formatar_df_renda_var(etfs), hide_index=True, use_container_width=True)
 
     st.markdown("### FI-Infra")
     fiinfra = renda_var_df.loc[renda_var_df["tipo_ativo"].eq("FI-Infra")]
-    mostrar_metricas(calcular_metricas(fiinfra, "rv"))
+    mostrar_metricas(calcular_metricas_rend(fiinfra, "rv"))
     st.dataframe(
         formatar_df_renda_var(fiinfra), hide_index=True, use_container_width=True
     )
 
     st.markdown("### Renda fixa")
     df_rf = renda_fixa_df.loc[renda_fixa_df["status"].eq(1)]
-    mostrar_metricas(calcular_metricas(df_rf, "rf"))
+    mostrar_metricas(calcular_metricas_rend(df_rf, "rf"))
     st.dataframe(
         formatar_df_renda_fixa(df_rf, inativos=False),
         hide_index=True,
@@ -70,6 +72,11 @@ def pagina_patrimonio(
     )
 
     st.markdown("### Movimentações")
+    cols = st.columns(4)
+    titulos = ["Compras", "Vendas", "Total investido"]
+    for idx, metrica in enumerate(calcular_metricas_mov(movimentacoes)):
+        cols[idx].metric(label=titulos[idx], value=formatar_dinheiro(metrica))
+
     st.plotly_chart(plotar_movimentacoes(movimentacoes), use_container_width=True)
 
 

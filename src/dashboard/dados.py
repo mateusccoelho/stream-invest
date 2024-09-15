@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 import sys
 
 sys.path.append("..")
@@ -6,6 +7,7 @@ import pandas as pd
 import streamlit as st
 
 from src.consolidacao_carteira import consolidar_carteira
+from src.utils.calendario import dia_util_anterior
 
 
 @st.cache_resource
@@ -162,7 +164,7 @@ def enriquecer_patrimonio_rv(
 
 
 @st.cache_resource
-def calcular_metricas(df: pd.DataFrame, tipo: str) -> pd.DataFrame:
+def calcular_metricas_rend(df: pd.DataFrame, tipo: str) -> pd.DataFrame:
     if tipo == "rv":
         patrimonio = df["patrimonio"].sum()
         investido = (df["preco_medio"] * df["qtd"]).sum()
@@ -318,3 +320,35 @@ def criar_df_taxas(df_fixa: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     )
     df_taxas_agg = df_taxas_agg.drop(columns=["valor_taxa"])
     return df_taxas, df_taxas_agg
+
+
+def calcular_metricas_trans_rv(df: pd.DataFrame) -> tuple[int, date, float, float]:
+    qtd_trans = df.shape[0]
+    dt_ultima_operacao = df["data"].max()
+    vlr_investido = df.loc[df["tipo"].eq("C"), "valor_trans"].sum()
+    vlr_vendido = df.loc[df["tipo"].eq("V"), "valor_trans"].sum()
+    return qtd_trans, dt_ultima_operacao, vlr_investido, vlr_vendido
+
+
+def calcular_metricas_mov(df: pd.DataFrame) -> tuple[float, float, float]:
+    print(df)
+    vlr_compras = df.loc[df["tipo"].eq("compra"), "valor_trans"].sum()
+    vlr_vendas = df.loc[df["tipo"].eq("venda"), "valor_trans"].sum()
+    aportes = vlr_compras - vlr_vendas
+    return vlr_compras, vlr_vendas, aportes
+
+
+def calcular_metricas_patr(df: pd.DataFrame) -> tuple[float, float, float, float]:
+    saldo = df.groupby("data")["saldo"].sum()
+    patrimonio_atual = saldo.iloc[-1]
+    retorno_total = patrimonio_atual / saldo.iloc[0] - 1
+    retorno_anualizado_total = (1 + retorno_total) ** (252 / saldo.shape[0]) - 1
+
+    dt_ano_anterior = saldo.index[-1] - timedelta(days=365)
+    try:
+        saldo_ano_ant = saldo.loc[dt_ano_anterior]
+    except KeyError:
+        saldo_ano_ant = saldo.loc[dia_util_anterior(dt_ano_anterior)]
+
+    retorno_ultimo_ano = saldo.iloc[-1] / saldo_ano_ant - 1
+    return patrimonio_atual, retorno_total, retorno_anualizado_total, retorno_ultimo_ano

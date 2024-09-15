@@ -26,11 +26,10 @@ def plotar_proventos(proventos: pd.DataFrame, por_ativo=False) -> go.Figure:
             "total": "Total (R$)",
             "codigo": "Código",
         },
-        title="Proventos por mês",
         color_discrete_sequence=px.colors.qualitative.Plotly,
     )
-    fig.update_xaxes(tickformat="%B, %Y", dtick="M1")
-    fig.update_layout(hovermode="x unified")
+    fig.update_xaxes(tickformat="%m/%y", dtick="M1")
+    fig.update_layout(hovermode="x unified", margin=dict(l=20, r=20, t=20, b=20))
     return fig
 
 
@@ -43,13 +42,14 @@ def plotar_saldo_no_tempo(valores_titulo: pd.DataFrame) -> go.Figure:
     )
     fig.update_layout(
         xaxis_title="Data",
-        yaxis_title="Valor (R$)",
+        yaxis_title="Saldo (R$)",
         margin=dict(l=20, r=20, t=20, b=20),
     )
     return fig
 
 
 def plotar_patrimonio_total(patrimonio: pd.DataFrame, por_ativo=False) -> go.Figure:
+    patrimonio = patrimonio.copy()
     patrimonio["classe"] = patrimonio["classe"].replace(CATEGORIAS_ATIVOS)
     patrimonio["data"] = pd.to_datetime(patrimonio["data"])
     patrimonio["data"] = patrimonio["data"].dt.to_period("M").dt.to_timestamp()
@@ -61,7 +61,7 @@ def plotar_patrimonio_total(patrimonio: pd.DataFrame, por_ativo=False) -> go.Fig
             x="data",
             y="saldo",
             color="classe",
-            labels={"data": "Data", "saldo": "Saldo (R$)", "classe": "Classe"},
+            labels={"data": "Data", "saldo": "Patrimônio (R$)", "classe": "Classe"},
             hover_data={"saldo": ":.2f"},
         )
         fig.update_layout(legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
@@ -71,7 +71,7 @@ def plotar_patrimonio_total(patrimonio: pd.DataFrame, por_ativo=False) -> go.Fig
             patr_mensal_total,
             x="data",
             y="saldo",
-            labels={"data": "Data", "saldo": "Saldo (R$)"},
+            labels={"data": "Data", "saldo": "Patrimônio (R$)"},
             markers=True,
         )
 
@@ -85,6 +85,7 @@ def plotar_patrimonio_total(patrimonio: pd.DataFrame, por_ativo=False) -> go.Fig
 
 
 def plotar_movimentacoes(movimentacoes: pd.DataFrame) -> go.Figure:
+    movimentacoes = movimentacoes.copy()
     movimentacoes["tipo"] = movimentacoes["tipo"].replace(
         {"compra": "Compra", "venda": "Venda"}
     )
@@ -113,11 +114,12 @@ def plotar_emissores(df: pd.DataFrame) -> go.Figure:
         .sum()
         .sort_values("saldo", ascending=False)
     )
+
     fig = px.bar(
         emissores,
         x="emissor",
         y="saldo",
-        labels={"saldo": "Saldo", "emissor": "Emissor"},
+        labels={"saldo": "Saldo (R$)", "emissor": "Emissor"},
         text_auto=True,
     )
     fig.update_traces(
@@ -127,4 +129,6 @@ def plotar_emissores(df: pd.DataFrame) -> go.Figure:
         textposition="outside",
         texttemplate="%{y:.2f}",
     )
+    fig.update_layout(margin=dict(l=20, r=20, t=20, b=20))
+
     return fig

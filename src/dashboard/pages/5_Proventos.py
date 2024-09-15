@@ -40,7 +40,6 @@ def pagina_proventos(proventos: pd.DataFrame):
     proventos_form = formatar_df_proventos(proventos_filt)
 
     st.markdown("# Proventos")
-    st.markdown("### Visão Geral")
 
     cols = st.columns(3)
     cols[0].metric("Total", formatar_dinheiro(proventos["total"].sum()))
