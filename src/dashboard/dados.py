@@ -234,6 +234,7 @@ def calcular_df_patrimonio_total(
 def calcular_mov_mensal(
     aportes_rf: pd.DataFrame, resgates_rf: pd.DataFrame, transacoes_rv: pd.DataFrame
 ):
+    aportes_rf = aportes_rf.copy()
     aportes_rf["data_compra"] = pd.to_datetime(aportes_rf["data_compra"])
     aportes_rf["data_compra"] = (
         aportes_rf["data_compra"].dt.to_period("M").dt.to_timestamp()
@@ -244,6 +245,7 @@ def calcular_mov_mensal(
         columns={"data_compra": "data", "valor": "valor_trans"}
     )
 
+    resgates_rf = resgates_rf.copy()
     resgates_rf["data_resgate"] = pd.to_datetime(resgates_rf["data_resgate"])
     resgates_rf["data_resgate"] = (
         resgates_rf["data_resgate"].dt.to_period("M").dt.to_timestamp()
@@ -256,6 +258,7 @@ def calcular_mov_mensal(
         columns={"data_resgate": "data", "valor": "valor_trans"}
     )
 
+    transacoes_rv = transacoes_rv.copy()
     transacoes_rv["data"] = pd.to_datetime(transacoes_rv["data"])
     transacoes_rv["data"] = transacoes_rv["data"].dt.to_period("M").dt.to_timestamp()
     transacoes_rv_mensal = transacoes_rv.groupby(["data", "tipo"], as_index=False)[
