@@ -3,6 +3,7 @@
 *.xlsx
 *.db
 *.csv
+*.bkp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

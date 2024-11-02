@@ -96,6 +96,7 @@ def tratar_resgates_rf(resgate_rf: pd.DataFrame) -> pd.DataFrame:
     return resgate_rf
 
 
+# O schema dos dataframes retornados está no arquivo diagrama_tabelas.drawio
 def consolidar_carteira() -> dict[str, pd.DataFrame]:
     cotacoes = pd.read_parquet(CAMINHO_DADOS / "cotacoes.parquet")
     proventos = tratar_proventos(le_dados_excel("Proventos RV"))
