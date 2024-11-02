@@ -6,7 +6,6 @@ import pandas as pd
 import streamlit as st
 
 from src.consolidacao_carteira import consolidar_carteira
-from src.utils.calendario import dia_util_anterior
 
 
 @st.cache_resource
@@ -182,6 +181,10 @@ def calcular_metricas_rend(df: pd.DataFrame, tipo: str) -> pd.DataFrame:
 def calcular_df_patrimonio_total(
     patrimonio_rf: pd.DataFrame, patrimonio_rv: pd.DataFrame
 ) -> pd.DataFrame:
+    """Calculado o patrimônio total por classe de ativo. No final empilha as classes
+    de renda fixa e renda variável em um único DataFrame.
+    """
+
     patrimonio_rf_agg = patrimonio_rf.groupby(["data", "index"], as_index=False).agg(
         saldo=pd.NamedAgg(column="valor", aggfunc="sum")
     )
@@ -343,10 +346,12 @@ def calcular_metricas_patr(df: pd.DataFrame) -> tuple[float, float, float, float
     retorno_anualizado_total = (1 + retorno_total) ** (252 / saldo.shape[0]) - 1
 
     dt_ano_anterior = saldo.index[-1] - timedelta(days=365)
-    try:
-        saldo_ano_ant = saldo.loc[dt_ano_anterior]
-    except KeyError:
-        saldo_ano_ant = saldo.loc[dia_util_anterior(dt_ano_anterior)]
+    while True:
+        try:
+            saldo_ano_ant = saldo.loc[dt_ano_anterior]
+            break
+        except KeyError:
+            dt_ano_anterior -= timedelta(days=1)
 
     retorno_ultimo_ano = saldo.iloc[-1] / saldo_ano_ant - 1
     return patrimonio_atual, retorno_total, retorno_anualizado_total, retorno_ultimo_ano
