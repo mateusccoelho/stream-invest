@@ -52,7 +52,7 @@ def pagina_rebalanceamento(carteira_rf: pd.DataFrame, carteira_rv: pd.DataFrame)
         carteira_rf, carteira_rv, aporte_geral, aportes_vals
     )
     rebalanc_form = formatar_df_rebalanceamento(rebalanc)
-    reserva = carteira_rf.loc[carteira_rf["emissor"].eq("Itaú Unibanco"), "saldo"].sum()
+    reserva = carteira_rf.loc[carteira_rf["reserva"], "saldo"].sum()
 
     st.dataframe(rebalanc_form, hide_index=True, use_container_width=True)
 
