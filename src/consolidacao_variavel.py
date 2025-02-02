@@ -83,7 +83,9 @@ def consolidar_renda_variavel(
     # No caso das compras, seria adicionar o valor transacionado ao patrimonio
     # anterior e subtrair do atual? No caso de vendas, eu uso o preço médio ou
     # o preço do dia? Porque preciso calcular o rendimento?
-    patrimonio_rv["patrimonio"] = patrimonio_rv["qtd_acum"] * patrimonio_rv["valor"]
+    patrimonio_rv["patrimonio"] = (
+        patrimonio_rv["qtd_acum"] * patrimonio_rv["valor"]
+    ).ffill()
 
     patrimonio_rv = patrimonio_rv.drop(
         columns=["variacao", "valor", "qtd", "qtd_sinal", "valor_trans"]
