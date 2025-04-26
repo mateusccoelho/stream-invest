@@ -1,9 +1,15 @@
+# Dados
 *.ipynb
 *.parquet
 *.xlsx
 *.db
 *.csv
 *.bkp
+
+# Exceções
+!feriados.csv
+!dias_sem_pregao.csv
+!dias_uteis.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
