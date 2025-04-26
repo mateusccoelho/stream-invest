@@ -105,7 +105,7 @@ def criar_df_rebalanceamento(
                 "acoes_br",
                 "acoes_mundo",
             ],
-            "porcent_alvo": [0.3, 0.1, 0.15, 0.1, 0.1, 0.05, 0.1, 0.1],
+            "porcent_alvo": [0.34, 0.1, 0.15, 0.1, 0.1, 0.05, 0.08, 0.08],
             "valor_atual": [
                 carteira_rf.loc[
                     carteira_rf["index"].eq("CDI") & (~carteira_rf["reserva"]),
@@ -232,14 +232,11 @@ def calcular_df_patrimonio_total(
 
 
 @st.cache_resource
-def calcular_mov_mensal(
+def calcular_mov_diaria(
     aportes_rf: pd.DataFrame, resgates_rf: pd.DataFrame, transacoes_rv: pd.DataFrame
 ):
     aportes_rf = aportes_rf.copy()
     aportes_rf["data_compra"] = pd.to_datetime(aportes_rf["data_compra"])
-    aportes_rf["data_compra"] = (
-        aportes_rf["data_compra"].dt.to_period("M").dt.to_timestamp()
-    )
     aportes_rf_mensal = aportes_rf.groupby("data_compra", as_index=False)["valor"].sum()
     aportes_rf_mensal.insert(1, "tipo", "compra")
     aportes_rf_mensal = aportes_rf_mensal.rename(
@@ -248,9 +245,6 @@ def calcular_mov_mensal(
 
     resgates_rf = resgates_rf.copy()
     resgates_rf["data_resgate"] = pd.to_datetime(resgates_rf["data_resgate"])
-    resgates_rf["data_resgate"] = (
-        resgates_rf["data_resgate"].dt.to_period("M").dt.to_timestamp()
-    )
     resgates_rf_mensal = resgates_rf.groupby("data_resgate", as_index=False)[
         "valor"
     ].sum()
@@ -261,7 +255,6 @@ def calcular_mov_mensal(
 
     transacoes_rv = transacoes_rv.copy()
     transacoes_rv["data"] = pd.to_datetime(transacoes_rv["data"])
-    transacoes_rv["data"] = transacoes_rv["data"].dt.to_period("M").dt.to_timestamp()
     transacoes_rv_mensal = transacoes_rv.groupby(["data", "tipo"], as_index=False)[
         "valor_trans"
     ].sum()
@@ -276,6 +269,14 @@ def calcular_mov_mensal(
         "valor_trans"
     ].sum()
     return movimentacoes
+
+
+@st.cache_resource
+def calcular_mov_mensal(mov_diaria: pd.DataFrame) -> pd.DataFrame:
+    mov_diaria = mov_diaria.copy()
+    mov_diaria["data"] = mov_diaria["data"].dt.to_period("M").dt.to_timestamp()
+    mov_mensal = mov_diaria.groupby(["data", "tipo"], as_index=False)["valor_trans"].sum()
+    return mov_mensal
 
 
 @st.cache_resource
@@ -359,3 +360,31 @@ def calcular_metricas_patr(df: pd.DataFrame) -> tuple[float, float, float, float
 
     retorno_ultimo_ano = saldo.iloc[-1] / saldo_ano_ant - 1
     return patrimonio_atual, retorno_total, retorno_anualizado_total, retorno_ultimo_ano
+
+
+def calcular_rendimento_diario(
+    patrimonio: pd.DataFrame, mov: pd.DataFrame, cotacoes: pd.DataFrame
+) -> pd.DataFrame:
+    mov = mov.copy()
+    mov["fluxo"] = mov["valor_trans"] * mov["tipo"].replace({"compra": 1, "venda": -1})
+    mov = mov.groupby("data", as_index=False)["fluxo"].sum()
+
+    patrimonio = patrimonio.copy()
+    patrimonio["data"] = pd.to_datetime(patrimonio["data"])
+    patrimonio = patrimonio.groupby(["data"], as_index=False)["saldo"].sum()
+    patrimonio = patrimonio.merge(mov, on="data", how="left")
+    patrimonio["fluxo"] = patrimonio["fluxo"].fillna(0)
+    patrimonio["saldo_ant"] = patrimonio["saldo"].shift(1).fillna(0)
+    patrimonio['retorno'] = (
+        patrimonio['saldo'] / (patrimonio['saldo_ant'] + patrimonio['fluxo'])
+    ).fillna(1)
+
+    cotacoes = cotacoes.copy()
+    cotacoes["data"] = pd.to_datetime(cotacoes["data"])
+    cotacoes = cotacoes.loc[cotacoes["codigo"].eq("CDI"), ["data", "variacao"]]
+    cotacoes["variacao"] = cotacoes["variacao"] + 1
+    cotacoes = cotacoes.rename(columns={"variacao": "cdi"})
+
+    patrimonio = patrimonio.merge(cotacoes, on="data", how="left")
+    return patrimonio
+    

@@ -119,6 +119,7 @@ def consolidar_carteira() -> dict[str, pd.DataFrame]:
         "resgates_rf": resgates_rf,
         "patrimonio_rf": patrimonio_rf,
         "carteira_rf": carteira_rf,
+        "cotacoes": cotacoes,
     }
 
 

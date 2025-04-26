@@ -13,9 +13,11 @@ from src.dashboard.dados import (
     enriquecer_patrimonio_rv,
     calcular_metricas_rend,
     calcular_df_patrimonio_total,
+    calcular_mov_diaria,
     calcular_mov_mensal,
     calcular_metricas_mov,
     calcular_metricas_patr,
+    calcular_rendimento_diario,
 )
 from src.dashboard.formatacao import (
     formatar_df_renda_var,
@@ -23,7 +25,11 @@ from src.dashboard.formatacao import (
     formatar_dinheiro,
     formatar_porcentagem,
 )
-from src.dashboard.graficos import plotar_patrimonio_total, plotar_movimentacoes
+from src.dashboard.graficos import (
+    plotar_patrimonio_total,
+    plotar_movimentacoes,
+    plotar_rendimento,
+)
 from src.dashboard.layout import mostrar_metricas
 
 
@@ -40,6 +46,7 @@ def pagina_patrimonio(
     renda_var_df: pd.DataFrame,
     patrimonio_total: pd.DataFrame,
     movimentacoes: pd.DataFrame,
+    rendimento: pd.DataFrame,
 ):
     st.markdown("# Patrimônio")
     mostrar_metricas_patr(calcular_metricas_patr(patrimonio_total))
@@ -74,10 +81,14 @@ def pagina_patrimonio(
     st.markdown("### Movimentações")
     cols = st.columns(4)
     titulos = ["Compras", "Vendas", "Total investido"]
-    for idx, metrica in enumerate(calcular_metricas_mov(movimentacoes)):
+    mov_mensal = calcular_mov_mensal(movimentacoes)
+    for idx, metrica in enumerate(calcular_metricas_mov(mov_mensal)):
         cols[idx].metric(label=titulos[idx], value=formatar_dinheiro(metrica))
 
-    st.plotly_chart(plotar_movimentacoes(movimentacoes), use_container_width=True)
+    st.plotly_chart(plotar_movimentacoes(mov_mensal), use_container_width=True)
+
+    st.markdown("### Rendimento diário")
+    st.plotly_chart(plotar_rendimento(rendimento), use_container_width=True)
 
 
 st.set_page_config(
@@ -95,12 +106,16 @@ renda_fixa_df = enriquecer_df_renda_fixa(dados["carteira_rf"], dados["aportes_rf
 patrimonio_rv = enriquecer_patrimonio_rv(dados["ativos_rv"], dados["patrimonio_rv"])
 patrimonio_rf = enriquecer_patrimonio_rf(dados["aportes_rf"], dados["patrimonio_rf"])
 patrimonio_total = calcular_df_patrimonio_total(patrimonio_rf, patrimonio_rv)
-movimentacoes = calcular_mov_mensal(
+movimentacoes = calcular_mov_diaria(
     dados["aportes_rf"], dados["resgates_rf"], dados["transacoes_rv"]
+)
+rendimento = calcular_rendimento_diario(
+    patrimonio_total, movimentacoes, dados["cotacoes"]
 )
 pagina_patrimonio(
     renda_fixa_df,
     renda_var_df,
     patrimonio_total,
     movimentacoes,
+    rendimento,
 )

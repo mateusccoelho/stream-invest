@@ -132,3 +132,37 @@ def plotar_emissores(df: pd.DataFrame) -> go.Figure:
     fig.update_layout(margin=dict(l=20, r=20, t=20, b=20))
 
     return fig
+
+
+def plotar_rendimento(rendimento: pd.DataFrame) -> go.Figure:
+    rendimento = rendimento.copy()
+    rendimento = rendimento[
+        rendimento["data"] >= pd.Timestamp.today() - pd.DateOffset(months=12)
+    ]
+    rendimento["retorno"] = (rendimento["retorno"].cumprod() - 1) * 100
+    rendimento["cdi"] = (rendimento["cdi"].cumprod() - 1) * 100
+    rendimento = rendimento.melt(
+        id_vars=["data"], 
+        value_vars=["retorno", "cdi"], 
+        var_name="tipo", 
+        value_name="rendimento"
+    )
+    rendimento["tipo"] = rendimento["tipo"].replace({
+        "retorno": "Carteira", "cdi": "CDI"
+    })
+    
+    fig = px.line(
+        rendimento,
+        x="data",
+        y="rendimento",
+        color="tipo",
+        labels={"data": "Data", "rendimento": "Rendimento (%)"},
+        markers=False,
+    )
+
+    fig.update_layout(
+        margin=dict(l=20, r=20, t=20, b=20),
+        hovermode="x unified",
+    )
+    return fig
+    
