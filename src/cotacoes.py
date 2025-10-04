@@ -100,6 +100,3 @@ class Cotacoes:
                 )
 
         self._calcular_variacoes_faltantes()
-
-    def salvar_cotacoes(self):
-        self.cotacoes.to_parquet("dados/cotacoes.parquet", index=False)
