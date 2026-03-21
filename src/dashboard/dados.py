@@ -105,7 +105,7 @@ def criar_df_rebalanceamento(
                 "acoes_br",
                 "acoes_mundo",
             ],
-            "porcent_alvo": [0.34, 0.1, 0.15, 0.1, 0.1, 0.05, 0.08, 0.08],
+            "porcent_alvo": [0.35, 0.10, 0.15, 0.1, 0.1, 0.05, 0.07, 0.08],
             "valor_atual": [
                 carteira_rf.loc[
                     carteira_rf["index"].eq("CDI") & (~carteira_rf["reserva"]),

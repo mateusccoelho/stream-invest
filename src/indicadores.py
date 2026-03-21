@@ -103,7 +103,7 @@ class CDI(IndicadorAbstrato):
         df = pd.read_html(StringIO(html_bruto), decimal=",", thousands=".")[0]
 
         for col in [0, 2, 4]:
-            df[col] = pd.to_datetime(df[col], format="%d/%m/%y")
+            df[col] = pd.to_datetime(df[col], format="%d/%m/%y", errors="coerce")
 
         for col in [1, 3, 5]:
             df[col] = pd.to_numeric(df[col], errors="coerce")
