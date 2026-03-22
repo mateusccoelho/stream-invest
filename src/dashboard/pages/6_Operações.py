@@ -32,6 +32,11 @@ from src.dashboard.constants import (
 from src.dashboard.formatacao import formatar_dinheiro
 
 
+def limpar_cache():
+    st.cache_data.clear()
+    st.cache_resource.clear()
+
+
 def pagina_operacoes():
     st.markdown("# Cadastro de Operações")
     st.caption(
@@ -97,6 +102,8 @@ def pagina_operacoes():
                     x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
                     for x in required
                 ):
+                    st.write(x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
+                    for x in required)
                     st.error("Preencha todos os campos obrigatórios.")
                 elif data_vencimento <= data_compra:
                     st.error("Data de vencimento deve ser posterior à data de compra.")
@@ -114,6 +121,7 @@ def pagina_operacoes():
                         reserva=reserva,
                     )
                     st.success(f"Aporte cadastrado com ID **{novo_id}**!")
+                    limpar_cache()
 
     # Resgate RF
     with tabs[1]:
@@ -177,6 +185,7 @@ def pagina_operacoes():
                             f"Resgate de {formatar_dinheiro(valor_resgate)} do aporte "
                             f"**{id_resgate}** cadastrado!"
                         )
+                        limpar_cache()
 
     # Transação RV
     with tabs[2]:
@@ -247,6 +256,7 @@ def pagina_operacoes():
                         f"Transação de {'compra' if operacao == 'C' else 'venda'} "
                         f"de **{qtd_trans}x {codigo_trans}** ({formatar_dinheiro(valor_total)}) cadastrada!"
                     )
+                    limpar_cache()
 
     # Provento RV
     with tabs[3]:
@@ -296,6 +306,7 @@ def pagina_operacoes():
                         f"Provento de **{codigo_prov}** "
                         f"({formatar_dinheiro(qtd_prov * valor_prov)}) cadastrado!"
                     )
+                    limpar_cache()
 
     # Ativo RV
     with tabs[4]:
@@ -324,6 +335,7 @@ def pagina_operacoes():
                     st.success(
                         f"Ativo **{codigo_ativo.upper()}** cadastrado/atualizado!"
                     )
+                    limpar_cache()
 
     # Proporções
     with tabs[5]:
@@ -355,6 +367,7 @@ def pagina_operacoes():
                 novos_valores = dict(zip(editado["classe"], editado["proporcao"]))
                 atualizar_proporcoes(novos_valores)
                 st.success("Proporções atualizadas!")
+                limpar_cache()
 
 
 st.set_page_config(
