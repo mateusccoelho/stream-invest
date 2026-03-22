@@ -53,17 +53,17 @@ Cada linha representa um aporte em um título de renda fixa, com as seguintes co
 
 | Nome            | Tipo de variável | Descrição                                                        | Valores possíveis           |
 |-----------------|------------------|------------------------------------------------------------------|-----------------------------|
-| id              | int              | Identificador único do aporte (PK)                               | Inteiro sequencial ≥ 1      |
-| corretora       | str              | Nome da corretora onde o aporte foi realizado                    | Livre                      |
-| emissor         | str              | Nome do emissor do título                                        | Livre                      |
-| tipo            | str              | Tipo do título de renda fixa                                     | CDB, LCI, LCA              |
-| forma           | str              | Tipo do indexador do título                                      | Pós, Pré                   |
-| data_compra     | date             | Data em que o aporte foi realizado                               | AAAA-MM-DD                 |
-| data_vencimento | date             | Data de vencimento do título                                     | AAAA-MM-DD                 |
-| indexador       | str              | Indexador do título                                              | CDI, Pré, IPCA +           |
-| taxa            | float            | Taxa de juros do título                                          | Livre                      |
-| valor           | float            | Valor investido no título                                        | Livre                      |
-| reserva         | bool             | Flag indicando se é reserva de emergência                        | 0 (False), 1 (True)        |
+| id              | INTEGER          | Identificador único do aporte (PK)                               | Inteiro sequencial ≥ 1      |
+| corretora       | TEXT             | Nome da corretora onde o aporte foi realizado                    | Livre                      |
+| emissor         | TEXT             | Nome do emissor do título                                        | Livre                      |
+| tipo            | TEXT             | Tipo do título de renda fixa                                     | CDB, LCI, LCA              |
+| forma           | TEXT             | Tipo do indexador do título                                      | Pós, Pré                   |
+| data_compra     | TEXT             | Data em que o aporte foi realizado                               | AAAA-MM-DD                 |
+| data_vencimento | TEXT             | Data de vencimento do título                                     | AAAA-MM-DD                 |
+| indexador       | TEXT             | Indexador do título                                              | CDI, Pré, IPCA +           |
+| taxa            | REAL             | Taxa de juros do título                                          | Livre                      |
+| valor           | REAL             | Valor investido no título                                        | Livre                      |
+| reserva         | INTEGER          | Flag indicando se é reserva de emergência                        | 0 (False), 1 (True)        |
 
 
 #### resgates_rf
@@ -72,10 +72,10 @@ Cada linha representa um resgate em um título de renda fixa, com as seguintes c
 
 | Nome         | Tipo de variável | Descrição                                                                 | Valores possíveis           |
 |--------------|------------------|---------------------------------------------------------------------------|-----------------------------|
-| id           | int              | Identificador do título resgatado (FK para aportes_rf)                    | Inteiro sequencial ≥ 1      |
-| data_resgate | date             | Data em que o resgate foi realizado                                       | AAAA-MM-DD                  |
-| valor        | float            | Valor resgatado, incluindo juros acumulados                               | Livre                       |
-| final        | bool             | Flag indicando se o resgate foi total (final) ou parcial                  | 0 (parcial), 1 (total)      |
+| id           | INTEGER          | Identificador do título resgatado (FK para aportes_rf)                    | Inteiro sequencial ≥ 1      |
+| data_resgate | TEXT             | Data em que o resgate foi realizado                                       | AAAA-MM-DD                  |
+| valor        | REAL             | Valor resgatado, incluindo juros acumulados                               | Livre                       |
+| final        | INTEGER          | Flag indicando se o resgate foi total (final) ou parcial                  | 0 (parcial), 1 (total)      |
 
 
 #### transacoes_rv
@@ -84,13 +84,13 @@ Cada linha representa uma transação (compra ou venda) em um ativo de renda var
 
 | Nome         | Tipo de variável | Descrição                                         | Valores possíveis         |
 |--------------|------------------|---------------------------------------------------|---------------------------|
-| data         | date             | Data da transação                                 | AAAA-MM-DD                |
-| codigo       | str              | Código de negociação do ativo                     | Livre                     |
-| operacao     | str              | Indica se é compra ou venda                       | C (compra), V (venda)     |
-| quantidade   | int              | Quantidade de ativos negociados                   | Inteiro ≥ 1               |
-| preco        | float            | Preço unitário do ativo                           | Livre                     |
-| corretora    | str              | Nome da corretora                                 | Livre                     |
-| taxas        | float            | Taxas associadas à transação                      | Livre                     |
+| data         | TEXT             | Data da transação                                 | AAAA-MM-DD                |
+| codigo       | TEXT             | Código de negociação do ativo                     | Livre                     |
+| operacao     | TEXT             | Indica se é compra ou venda                       | C (compra), V (venda)     |
+| quantidade   | INTEGER          | Quantidade de ativos negociados                   | Inteiro ≥ 1               |
+| preco        | REAL             | Preço unitário do ativo                           | Livre                     |
+| corretora    | TEXT             | Nome da corretora                                 | Livre                     |
+| taxas        | REAL             | Taxas associadas à transação                      | Livre                     |
 
 
 #### proventos_rv
@@ -99,11 +99,11 @@ Cada linha representa um provento recebido de um ativo de renda variável, com a
 
 | Nome            | Tipo de variável | Descrição                                 | Valores possíveis |
 |-----------------|------------------|-------------------------------------------|-------------------|
-| data_pagamento  | date             | Data em que o provento foi pago           | AAAA-MM-DD        |
-| codigo          | str              | Código de negociação do ativo             | Livre             |
-| quantidade      | int              | Quantidade de ativos que geraram provento | Inteiro ≥ 1       |
-| valor           | float            | Valor unitário do provento recebido       | Livre             |
-| tipo            | str              | Tipo do provento                          | Rendimento        |
+| data_pagamento  | TEXT             | Data em que o provento foi pago           | AAAA-MM-DD        |
+| codigo          | TEXT             | Código de negociação do ativo             | Livre             |
+| quantidade      | INTEGER          | Quantidade de ativos que geraram provento | Inteiro ≥ 1       |
+| valor           | REAL             | Valor unitário do provento recebido       | Livre             |
+| tipo            | TEXT             | Tipo do provento                          | Rendimento        |
 
 
 #### ativos_rv
@@ -112,9 +112,9 @@ Cada linha representa um ativo de renda variável, com as seguintes colunas:
 
 | Nome      | Tipo de variável | Descrição                        | Valores possíveis        |
 |-----------|------------------|----------------------------------|--------------------------|
-| codigo    | str              | Código de negociação do ativo (PK)| Livre                    |
-| tipo      | str              | Tipo do ativo                    | Ação, ETF, FII, FI-Infra |
-| benchmark | str              | Benchmark de comparação do ativo | Livre                    |
+| codigo    | TEXT             | Código de negociação do ativo (PK)| Livre                    |
+| tipo      | TEXT             | Tipo do ativo                    | Ação, ETF, FII, FI-Infra |
+| benchmark | TEXT             | Benchmark de comparação do ativo | Livre                    |
 
 
 #### proporcoes
@@ -123,5 +123,5 @@ Cada linha representa a proporção alvo de uma classe de ativos na carteira, co
 
 | Nome      | Tipo de variável | Descrição                                         | Valores possíveis                                             |
 |-----------|------------------|---------------------------------------------------|---------------------------------------------------------------|
-| classe    | str              | Classe de ativos (PK)                             | Títulos CDI, FI-Infra CDI, ETF IMAB, Títulos IPCA+, FI-Infra IMAB, Títulos Pré, Ações Brasil, Ações Mundo |
-| proporcao | float            | Proporção alvo da classe de ativos na carteira (%)| 0.0 a 1.0 (percentual)                                        |
+| classe    | TEXT             | Classe de ativos (PK)                             | Títulos CDI, FI-Infra CDI, ETF IMAB, Títulos IPCA+, FI-Infra IMAB, Títulos Pré, Ações Brasil, Ações Mundo |
+| proporcao | REAL             | Proporção alvo da classe de ativos na carteira (%)| 0.0 a 1.0 (percentual)                                        |
