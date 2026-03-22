@@ -288,6 +288,7 @@ def inserir_proporcao(
 
 def atualizar_proporcoes(proporcoes: dict[str, float]) -> None:
     """Atualiza as proporções existentes no banco."""
+
     with conectar() as conn:
         for classe, proporcao in proporcoes.items():
             conn.execute(
@@ -303,6 +304,7 @@ def atualizar_proporcoes(proporcoes: dict[str, float]) -> None:
 
 def proximo_id_aporte_rf() -> int:
     """Retorna o próximo ID disponível para aportes RF."""
+
     with conectar() as conn:
         row = conn.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM aportes_rf").fetchone()
         return row[0]
@@ -310,13 +312,23 @@ def proximo_id_aporte_rf() -> int:
 
 def listar_codigos_rv() -> list[str]:
     """Lista todos os códigos de ativos RV cadastrados."""
+
     with conectar() as conn:
         rows = conn.execute("SELECT codigo FROM ativos_rv ORDER BY codigo").fetchall()
     return [r[0] for r in rows]
 
 
+def listar_classes_ativos() -> list[str]:
+    """Lista as classes de ativos presentes na tabela de proporções."""
+
+    with conectar() as conn:
+        rows = conn.execute("SELECT classe FROM proporcoes ORDER BY classe").fetchall()
+    return [r[0] for r in rows]
+
+
 def listar_ids_aportes_rf_ativos() -> list[int]:
     """Lista IDs de aportes RF que ainda não tiveram resgate final."""
+
     with conectar() as conn:
         rows = conn.execute(
             "SELECT a.id FROM aportes_rf a "

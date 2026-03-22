@@ -42,7 +42,6 @@ def pagina_rebalanceamento(
     _inicializar_estado()
 
     st.markdown("# Rebalanceamento")
-    st.divider()
 
     # Aportes
     st.markdown("#### Aportes")
@@ -74,8 +73,6 @@ def pagina_rebalanceamento(
     aporte_geral = aportes_dict.get("Geral", 0.0)
     aportes_vals = pd.Series({c: aportes_dict.get(c, 0.0) for c in classes})
 
-    st.divider()
-
     # Tabela de rebalanceamento
     rebalanc = criar_df_rebalanceamento(
         carteira_rf, carteira_rv, aporte_geral, aportes_vals, proporcoes
@@ -85,8 +82,6 @@ def pagina_rebalanceamento(
 
     st.markdown("#### Tabela de rebalanceamento")
     st.dataframe(rebalanc_form, hide_index=True, use_container_width=True)
-
-    st.divider()
 
     # Métricas e patrimônio externo
     st.markdown("#### Patrimônio total")
