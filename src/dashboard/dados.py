@@ -92,57 +92,27 @@ def criar_df_rebalanceamento(
     carteira_rv: pd.DataFrame,
     aporte_geral: float,
     aportes_vals: list[float],
+    proporcoes: pd.DataFrame,
 ) -> pd.DataFrame:
-    df = pd.DataFrame(
-        {
-            "tipo": [
-                "titulos_priv_cdi",
-                "fi_infra_cdi",
-                "titulos_pub_ipca",
-                "titulos_priv_ipca",
-                "fi_infra_ipca",
-                "titulos_priv_pre",
-                "acoes_br",
-                "acoes_mundo",
-            ],
-            "porcent_alvo": [0.35, 0.10, 0.15, 0.1, 0.1, 0.05, 0.07, 0.08],
-            "valor_atual": [
-                carteira_rf.loc[
-                    carteira_rf["index"].eq("CDI") & (~carteira_rf["reserva"]),
-                    "saldo",
-                ].sum(),
-                carteira_rv.loc[
-                    carteira_rv["tipo_ativo"].eq("FI-Infra")
-                    & carteira_rv["bench"].eq("CDI"),
-                    "patrimonio",
-                ].sum(),
-                carteira_rv.loc[
-                    carteira_rv["tipo_ativo"].eq("ETF")
-                    & carteira_rv["bench"].eq("IMAB 5"),
-                    "patrimonio",
-                ].sum(),
-                carteira_rf.loc[carteira_rf["index"].eq("IPCA +"), "saldo"].sum(),
-                carteira_rv.loc[
-                    carteira_rv["tipo_ativo"].eq("FI-Infra")
-                    & carteira_rv["bench"].eq("IMAB 5"),
-                    "patrimonio",
-                ].sum(),
-                carteira_rf.loc[carteira_rf["index"].eq("Pré"), "saldo"].sum(),
-                carteira_rv.loc[carteira_rv["codigo"].eq("PIBB11"), "patrimonio"].sum(),
-                carteira_rv.loc[carteira_rv["codigo"].eq("ACWI11"), "patrimonio"].sum(),
-            ],
-        }
-    )
+    # Mapeamento entre nomes da planilha e lógica de cálculo do valor atual
+    classe_to_valor_atual = {
+        "Títulos CDI": carteira_rf.loc[carteira_rf["index"].eq("CDI") & (~carteira_rf["reserva"]), "saldo"].sum(),
+        "FI-Infra CDI": carteira_rv.loc[(carteira_rv["tipo_ativo"].eq("FI-Infra")) & (carteira_rv["bench"].eq("CDI")), "patrimonio"].sum(),
+        "ETF IMAB": carteira_rv.loc[(carteira_rv["tipo_ativo"].eq("ETF")) & (carteira_rv["bench"].eq("IMAB 5")), "patrimonio"].sum(),
+        "Títulos IPCA+": carteira_rf.loc[carteira_rf["index"].eq("IPCA +"), "saldo"].sum(),
+        "FI-Infra IMAB": carteira_rv.loc[(carteira_rv["tipo_ativo"].eq("FI-Infra")) & (carteira_rv["bench"].eq("IMAB 5")), "patrimonio"].sum(),
+        "Títulos Pré": carteira_rf.loc[carteira_rf["index"].eq("Pré"), "saldo"].sum(),
+        "Ações Brasil": carteira_rv.loc[carteira_rv["codigo"].eq("PIBB11"), "patrimonio"].sum(),
+        "Ações Mundo": carteira_rv.loc[carteira_rv["codigo"].eq("ACWI11"), "patrimonio"].sum(),
+    }
+
+    df = proporcoes.copy()
+    df["valor_atual"] = df["classe"].map(lambda c: classe_to_valor_atual.get(c, 0.0))
     df["porcent_atual"] = df["valor_atual"] / df["valor_atual"].sum()
-
     total_com_aportes = df["valor_atual"].sum() + aporte_geral + sum(aportes_vals)
-    df["valor_alvo"] = df["porcent_alvo"] * total_com_aportes
-
+    df["valor_alvo"] = df["proporcao"] * total_com_aportes
     valor_com_aportes = df["valor_atual"] + pd.Series(aportes_vals)
-    # A lista de aportes individuais tem que estar na mesma ordem da tabela de
-    # rebalanceamento para que a conta funcione.
     df["delta"] = df["valor_alvo"] - valor_com_aportes
-
     return df
 
 

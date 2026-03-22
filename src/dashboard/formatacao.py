@@ -2,8 +2,6 @@ import locale
 
 import pandas as pd
 
-from src.dashboard.constants import CATEGORIAS_ATIVOS
-
 locale.setlocale(locale.LC_ALL, "pt_BR")
 
 
@@ -73,18 +71,16 @@ def formatar_df_proventos(df: pd.DataFrame) -> pd.DataFrame:
 def formatar_df_rebalanceamento(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
-    for col in ["porcent_alvo", "porcent_atual"]:
+    for col in ["proporcao", "porcent_atual"]:
         df[col] = df[col].apply(formatar_porcentagem)
 
     for col in ["valor_alvo", "valor_atual", "delta"]:
         df[col] = df[col].apply(formatar_dinheiro)
 
-    df["tipo"] = df["tipo"].replace(CATEGORIAS_ATIVOS)
-
     df = df.rename(
         columns={
-            "tipo": "Classe de ativos",
-            "porcent_alvo": "Porcentagem alvo",
+            "classe": "Classe de ativos",
+            "proporcao": "Porcentagem alvo",
             "porcent_atual": "Porcentagem atual",
             "valor_alvo": "Valor alvo",
             "valor_atual": "Valor atual",

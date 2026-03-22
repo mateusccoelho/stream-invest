@@ -96,6 +96,13 @@ def tratar_resgates_rf(resgate_rf: pd.DataFrame) -> pd.DataFrame:
     return resgate_rf
 
 
+def tratar_proporcoes(proporcoes: pd.DataFrame) -> pd.DataFrame:
+    df = proporcoes.rename(columns={"Classe": "classe", "Proporção": "proporcao"})
+    df["classe"] = df["classe"].astype(str)
+    df["proporcao"] = df["proporcao"].astype(float)
+    return df
+
+
 # O schema dos dataframes retornados está no arquivo diagrama_tabelas.drawio
 def consolidar_carteira() -> dict[str, pd.DataFrame]:
     cotacoes = pd.read_parquet(CAMINHO_DADOS / "cotacoes.parquet")
@@ -108,6 +115,7 @@ def consolidar_carteira() -> dict[str, pd.DataFrame]:
     patrimonio_rf, carteira_rf = consolidar_renda_fixa(
         aportes_rf, resgates_rf, cotacoes
     )
+    proporcoes = tratar_proporcoes(le_dados_excel("Proporções"))
 
     return {
         "proventos": proventos,
@@ -120,6 +128,7 @@ def consolidar_carteira() -> dict[str, pd.DataFrame]:
         "patrimonio_rf": patrimonio_rf,
         "carteira_rf": carteira_rf,
         "cotacoes": cotacoes,
+        "proporcoes": proporcoes,
     }
 
 

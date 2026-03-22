@@ -16,7 +16,7 @@ from src.dashboard.formatacao import (
 )
 
 
-def pagina_rebalanceamento(carteira_rf: pd.DataFrame, carteira_rv: pd.DataFrame):
+def pagina_rebalanceamento(carteira_rf: pd.DataFrame, carteira_rv: pd.DataFrame, proporcoes: pd.DataFrame):
     st.markdown("# Rebalanceamento")
     cols = st.columns(3)
     ccs = cols[0].number_input(
@@ -30,12 +30,12 @@ def pagina_rebalanceamento(carteira_rf: pd.DataFrame, carteira_rv: pd.DataFrame)
     )
 
     aportes_cols = {
-        "Títulos privados CDI": 0,
+        "Títulos CDI": 0,
         "FI-Infra CDI": 0,
-        "Títulos públicos IPCA": 1,
-        "Títulos privados IPCA": 1,
-        "FI-Infra IPCA": 1,
-        "Títulos privados pré": 2,
+        "ETF IMAB": 1,
+        "Títulos IPCA+": 1,
+        "FI-Infra IMAB": 1,
+        "Títulos Pré": 2,
         "Ações Brasil": 3,
         "Ações Mundo": 3,
     }
@@ -50,7 +50,7 @@ def pagina_rebalanceamento(carteira_rf: pd.DataFrame, carteira_rv: pd.DataFrame)
             )
 
     rebalanc = criar_df_rebalanceamento(
-        carteira_rf, carteira_rv, aporte_geral, aportes_vals
+        carteira_rf, carteira_rv, aporte_geral, aportes_vals, proporcoes
     )
     rebalanc_form = formatar_df_rebalanceamento(rebalanc)
     reserva = carteira_rf.loc[carteira_rf["reserva"], "saldo"].sum()
@@ -83,4 +83,4 @@ carteira_rf, carteira_rv = enriquecer_dfs_carteira(
     dados["carteira_rf"],
     dados["carteira_rv"],
 )
-pagina_rebalanceamento(carteira_rf, carteira_rv)
+pagina_rebalanceamento(carteira_rf, carteira_rv, dados["proporcoes"])
