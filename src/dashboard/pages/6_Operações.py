@@ -39,14 +39,16 @@ def pagina_operacoes():
         "Após cadastrar, reinicie o dashboard para ver os dados atualizados."
     )
 
-    tabs = st.tabs([
-        "Aporte RF",
-        "Resgate RF",
-        "Transação RV",
-        "Provento RV",
-        "Ativo RV",
-        "Proporções",
-    ])
+    tabs = st.tabs(
+        [
+            "Aporte RF",
+            "Resgate RF",
+            "Transação RV",
+            "Provento RV",
+            "Ativo RV",
+            "Proporções",
+        ]
+    )
 
     # Aporte RF
     with tabs[0]:
@@ -63,19 +65,38 @@ def pagina_operacoes():
             cols2 = st.columns(3)
             forma = cols2[0].selectbox("Forma", FORMAS_RF, index=None)
             indexador = cols2[1].selectbox("Indexador", INDEXADORES_RF, index=None)
-            taxa = cols2[2].number_input("Taxa (%)", min_value=0.0, step=0.01, format="%.4f", value=None)
+            taxa = cols2[2].number_input(
+                "Taxa (%)", min_value=0.0, step=0.01, format="%.4f", value=None
+            )
 
             cols3 = st.columns(3)
             data_compra = cols3[0].date_input("Data de compra", value=None)
             data_vencimento = cols3[1].date_input("Data de vencimento", value=None)
-            valor = cols3[2].number_input("Valor (R$)", min_value=0.0, step=0.01, format="%.2f", value=None)
+            valor = cols3[2].number_input(
+                "Valor (R$)", min_value=0.0, step=0.01, format="%.2f", value=None
+            )
 
             reserva = st.checkbox("Reserva de emergência")
-            submitted = st.form_submit_button("💾 Cadastrar aporte", use_container_width=True)
+            submitted = st.form_submit_button(
+                "💾 Cadastrar aporte", use_container_width=True
+            )
 
             if submitted:
-                required = [corretora, emissor, tipo_rf, forma, indexador, taxa, data_compra, data_vencimento, valor]
-                if any(x is None or x == "" or (isinstance(x, (int, float)) and x <= 0) for x in required):
+                required = [
+                    corretora,
+                    emissor,
+                    tipo_rf,
+                    forma,
+                    indexador,
+                    taxa,
+                    data_compra,
+                    data_vencimento,
+                    valor,
+                ]
+                if any(
+                    x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
+                    for x in required
+                ):
                     st.error("Preencha todos os campos obrigatórios.")
                 elif data_vencimento <= data_compra:
                     st.error("Data de vencimento deve ser posterior à data de compra.")
@@ -106,7 +127,18 @@ def pagina_operacoes():
             aportes_ativos = aportes_df[aportes_df["id"].isin(ids_ativos)]
             with st.expander("Ver aportes ativos"):
                 st.dataframe(
-                    aportes_ativos[["id", "emissor", "tipo", "index", "taxa", "valor", "data_compra", "data_venc"]],
+                    aportes_ativos[
+                        [
+                            "id",
+                            "emissor",
+                            "tipo",
+                            "index",
+                            "taxa",
+                            "valor",
+                            "data_compra",
+                            "data_venc",
+                        ]
+                    ],
                     hide_index=True,
                     use_container_width=True,
                 )
@@ -116,14 +148,23 @@ def pagina_operacoes():
                 id_resgate = cols[0].selectbox("ID do aporte", ids_ativos, index=None)
                 data_resgate = cols[1].date_input("Data do resgate", value=None)
                 valor_resgate = cols[2].number_input(
-                    "Valor resgatado (R$)", min_value=0.0, step=0.01, format="%.2f", value=None
+                    "Valor resgatado (R$)",
+                    min_value=0.0,
+                    step=0.01,
+                    format="%.2f",
+                    value=None,
                 )
                 final = st.checkbox("Resgate total (final)")
-                submitted = st.form_submit_button("💾 Cadastrar resgate", use_container_width=True)
+                submitted = st.form_submit_button(
+                    "💾 Cadastrar resgate", use_container_width=True
+                )
 
                 if submitted:
                     required = [id_resgate, data_resgate, valor_resgate]
-                    if any(x is None or x == "" or (isinstance(x, (int, float)) and x <= 0) for x in required):
+                    if any(
+                        x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
+                        for x in required
+                    ):
                         st.error("Preencha todos os campos obrigatórios.")
                     else:
                         inserir_resgate_rf(
@@ -151,21 +192,45 @@ def pagina_operacoes():
             else:
                 codigo_trans = cols[1].text_input("Código do ativo")
             operacao = cols[2].selectbox(
-                "Operação", OPERACOES_RV, index=None,
+                "Operação",
+                OPERACOES_RV,
+                index=None,
                 format_func=lambda x: "Compra" if x == "C" else "Venda",
             )
             corretora_rv = cols[3].text_input("Corretora")
 
             cols2 = st.columns(3)
-            qtd_trans = cols2[0].number_input("Quantidade", min_value=0, step=1, value=None)
-            preco_trans = cols2[1].number_input("Preço unitário (R$)", min_value=0.0, step=0.01, format="%.2f", value=None)
-            taxas_trans = cols2[2].number_input("Taxas (R$)", min_value=0.0, step=0.01, format="%.2f", value=None)
+            qtd_trans = cols2[0].number_input(
+                "Quantidade", min_value=0, step=1, value=None
+            )
+            preco_trans = cols2[1].number_input(
+                "Preço unitário (R$)",
+                min_value=0.0,
+                step=0.01,
+                format="%.2f",
+                value=None,
+            )
+            taxas_trans = cols2[2].number_input(
+                "Taxas (R$)", min_value=0.0, step=0.01, format="%.2f", value=None
+            )
 
-            submitted = st.form_submit_button("💾 Cadastrar transação", use_container_width=True)
+            submitted = st.form_submit_button(
+                "💾 Cadastrar transação", use_container_width=True
+            )
 
             if submitted:
-                required = [data_trans, codigo_trans, operacao, corretora_rv, qtd_trans, preco_trans]
-                if any(x is None or x == "" or (isinstance(x, (int, float)) and x <= 0) for x in required):
+                required = [
+                    data_trans,
+                    codigo_trans,
+                    operacao,
+                    corretora_rv,
+                    qtd_trans,
+                    preco_trans,
+                ]
+                if any(
+                    x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
+                    for x in required
+                ):
                     st.error("Preencha todos os campos obrigatórios.")
                 else:
                     inserir_transacao_rv(
@@ -196,15 +261,28 @@ def pagina_operacoes():
                 codigo_prov = cols[1].selectbox("Código do ativo", codigos, index=None)
             else:
                 codigo_prov = cols[1].text_input("Código do ativo")
-            qtd_prov = cols[2].number_input("Quantidade", min_value=0, step=1, value=None)
-            valor_prov = cols[3].number_input("Valor unitário (R$)", min_value=0.0, step=0.0001, format="%.4f", value=None)
+            qtd_prov = cols[2].number_input(
+                "Quantidade", min_value=0, step=1, value=None
+            )
+            valor_prov = cols[3].number_input(
+                "Valor unitário (R$)",
+                min_value=0.0,
+                step=0.0001,
+                format="%.4f",
+                value=None,
+            )
 
             tipo_prov = st.selectbox("Tipo", TIPOS_PROVENTO_RV, index=None)
-            submitted = st.form_submit_button("💾 Cadastrar provento", use_container_width=True)
+            submitted = st.form_submit_button(
+                "💾 Cadastrar provento", use_container_width=True
+            )
 
             if submitted:
                 required = [data_prov, codigo_prov, qtd_prov, valor_prov, tipo_prov]
-                if any(x is None or x == "" or (isinstance(x, (int, float)) and x <= 0) for x in required):
+                if any(
+                    x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
+                    for x in required
+                ):
                     st.error("Preencha todos os campos obrigatórios.")
                 else:
                     inserir_provento_rv(
@@ -229,7 +307,9 @@ def pagina_operacoes():
             tipo_ativo = cols[1].selectbox("Tipo", TIPOS_ATIVO_RV, index=None)
             benchmark = cols[2].text_input("Benchmark")
 
-            submitted = st.form_submit_button("💾 Cadastrar ativo", use_container_width=True)
+            submitted = st.form_submit_button(
+                "💾 Cadastrar ativo", use_container_width=True
+            )
 
             if submitted:
                 required = [codigo_ativo, tipo_ativo, benchmark]
@@ -241,7 +321,9 @@ def pagina_operacoes():
                         tipo=tipo_ativo,
                         benchmark=benchmark,
                     )
-                    st.success(f"Ativo **{codigo_ativo.upper()}** cadastrado/atualizado!")
+                    st.success(
+                        f"Ativo **{codigo_ativo.upper()}** cadastrado/atualizado!"
+                    )
 
     # Proporções
     with tabs[5]:
@@ -257,7 +339,11 @@ def pagina_operacoes():
                 column_config={
                     "classe": st.column_config.TextColumn("Classe", disabled=True),
                     "proporcao": st.column_config.NumberColumn(
-                        "Proporção", min_value=0.0, max_value=1.0, step=0.01, format="%.4f",
+                        "Proporção",
+                        min_value=0.0,
+                        max_value=1.0,
+                        step=0.01,
+                        format="%.4f",
                     ),
                 },
                 hide_index=True,

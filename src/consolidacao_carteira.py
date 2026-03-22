@@ -1,4 +1,3 @@
-from pathlib import Path
 from datetime import date
 
 import pandas as pd
@@ -7,7 +6,6 @@ from src.consolidacao_variavel import consolidar_renda_variavel
 from src.consolidacao_fixa import consolidar_renda_fixa
 from src.database import (
     CAMINHO_DADOS,
-    criar_tabelas,
     ler_aportes_rf,
     ler_resgates_rf,
     ler_transacoes_rv,

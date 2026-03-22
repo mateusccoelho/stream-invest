@@ -8,8 +8,6 @@ O banco será criado em dados/investimentos.db.
 A planilha Excel original não é removida.
 """
 
-from pathlib import Path
-
 import pandas as pd
 
 from src.database import (
@@ -18,7 +16,6 @@ from src.database import (
     criar_tabelas,
     conectar,
 )
-
 
 CAMINHO_EXCEL = CAMINHO_DADOS / "Investimentos.xlsx"
 
@@ -122,8 +119,7 @@ def migrar():
     with conectar() as conn:
         for _, row in df.iterrows():
             conn.execute(
-                "INSERT INTO ativos_rv (codigo, tipo, benchmark) "
-                "VALUES (?, ?, ?)",
+                "INSERT INTO ativos_rv (codigo, tipo, benchmark) " "VALUES (?, ?, ?)",
                 (
                     str(row["Código"]),
                     str(row["Tipo"]),

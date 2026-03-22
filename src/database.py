@@ -19,6 +19,7 @@ CAMINHO_DB = CAMINHO_DADOS / "investimentos.db"
 # Conexão
 # ---------------------------------------------------------------------------
 
+
 @contextmanager
 def conectar():
     """Context manager que retorna uma conexão SQLite."""
@@ -109,6 +110,7 @@ def criar_tabelas():
 # Leitura (retorna DataFrames com nomes de coluna iguais aos da planilha)
 # ---------------------------------------------------------------------------
 
+
 def ler_aportes_rf() -> pd.DataFrame:
     with conectar() as conn:
         df = pd.read_sql_query(
@@ -168,15 +170,14 @@ def ler_ativos_rv() -> pd.DataFrame:
 
 def ler_proporcoes() -> pd.DataFrame:
     with conectar() as conn:
-        df = pd.read_sql_query(
-            "SELECT classe, proporcao FROM proporcoes", conn
-        )
+        df = pd.read_sql_query("SELECT classe, proporcao FROM proporcoes", conn)
     return df
 
 
 # ---------------------------------------------------------------------------
 # Escrita – inserções unitárias (para o formulário do dashboard)
 # ---------------------------------------------------------------------------
+
 
 def inserir_aporte_rf(
     corretora: str,
@@ -198,9 +199,16 @@ def inserir_aporte_rf(
             "indexador, taxa, valor, reserva) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
-                corretora, emissor, tipo, forma,
-                str(data_compra), str(data_vencimento),
-                indexador, taxa, valor, int(reserva),
+                corretora,
+                emissor,
+                tipo,
+                forma,
+                str(data_compra),
+                str(data_vencimento),
+                indexador,
+                taxa,
+                valor,
+                int(reserva),
             ),
         )
         return cursor.lastrowid
@@ -273,8 +281,7 @@ def inserir_proporcao(
 ) -> None:
     with conectar() as conn:
         conn.execute(
-            "INSERT OR REPLACE INTO proporcoes (classe, proporcao) "
-            "VALUES (?, ?)",
+            "INSERT OR REPLACE INTO proporcoes (classe, proporcao) " "VALUES (?, ?)",
             (classe, proporcao),
         )
 
@@ -293,6 +300,7 @@ def atualizar_proporcoes(proporcoes: dict[str, float]) -> None:
 # Utilitários
 # ---------------------------------------------------------------------------
 
+
 def proximo_id_aporte_rf() -> int:
     """Retorna o próximo ID disponível para aportes RF."""
     with conectar() as conn:
@@ -303,9 +311,7 @@ def proximo_id_aporte_rf() -> int:
 def listar_codigos_rv() -> list[str]:
     """Lista todos os códigos de ativos RV cadastrados."""
     with conectar() as conn:
-        rows = conn.execute(
-            "SELECT codigo FROM ativos_rv ORDER BY codigo"
-        ).fetchall()
+        rows = conn.execute("SELECT codigo FROM ativos_rv ORDER BY codigo").fetchall()
     return [r[0] for r in rows]
 
 
