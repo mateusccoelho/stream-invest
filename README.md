@@ -27,88 +27,101 @@ Atualmente o aplicativo contém 5 páginas:
 
 ## Dados
 
-O processo de atualização ainda é manual. Os dados são preenchidos em uma planilha no Google Sheets (drive) e devem ser manualmente baixados em formato Excel (.xlsx) para a máquina local. O diretório deve ser `dados`, contido neste repositório. Depois, a atualização dos indicadores e a inicialização do dashboard devem ser disparados por meio do script `start.sh`.
+Os dados de operações são armazenados em um banco de dados SQLite localizado em `dados/investimentos.db`. A atualização dos indicadores e a inicialização do dashboard devem ser disparados por meio do script `start.sh`.
 
-### Planilha
+### Migração da planilha
 
-A planilha é composta por 6 abas que serão explicadas detalhadamente a seguir: `Aportes RF`, `Resgates RF`, `Transações RV`, `Proventos RV`, `Ativos RV` e `Proporções`.
+O projeto originalmente usava uma planilha Excel (`dados/Investimentos.xlsx`). Se o banco de dados SQLite ainda não existir e a planilha estiver presente na pasta `dados`, o script `start.sh` executará automaticamente a migração dos dados. A migração também pode ser executada manualmente:
+
+```bash
+python -m src.migra_excel_sqlite
+```
+
+### Cadastro de operações
+
+Novas operações podem ser cadastradas diretamente pelo dashboard na página **Operações** (aba lateral). Após cadastrar, reinicie o dashboard para que os dados sejam recalculados.
+
+### Banco de dados
 
 
-#### Aportes RF
+O banco de dados é composto por 6 tabelas que serão explicadas detalhadamente a seguir: `aportes_rf`, `resgates_rf`, `transacoes_rv`, `proventos_rv`, `ativos_rv` e `proporcoes`.
+
+
+#### aportes_rf
 
 Cada linha representa um aporte em um título de renda fixa, com as seguintes colunas:
 
-| Nome           | Tipo de variável | Descrição                                                        | Valores possíveis           |
-|----------------|------------------|------------------------------------------------------------------|-----------------------------|
-| ID             | int              | Identificador único do aporte                                    | Inteiro sequencial ≥ 1      |
-| Corretora      | str              | Nome da corretora onde o aporte foi realizado                    | Livre                      |
-| Emissor        | str              | Nome do emissor do título                                        | Livre                      |
-| Tipo           | str              | Tipo do título de renda fixa                                     | CDB, LCI, LCA              |
-| Forma          | str              | Tipo do indexador do título                                      | Pós, Pré                   |
-| Data compra    | date             | Data em que o aporte foi realizado                               | AAAA-MM-DD                 |
-| Data vencimento| date             | Data de vencimento do título                                     | AAAA-MM-DD                 |
-| Indexador      | str              | Indexador do título                                              | CDI, Pré, IPCA +           |
-| Taxa           | float            | Taxa de juros do título                                          | Livre                      |
-| Valor          | float            | Valor investido no título                                        | Livre                      |
-| Reserva        | bool             | Flag indicando se é reserva de emergência                        | True, False                |
+| Nome            | Tipo de variável | Descrição                                                        | Valores possíveis           |
+|-----------------|------------------|------------------------------------------------------------------|-----------------------------|
+| id              | int              | Identificador único do aporte (PK)                               | Inteiro sequencial ≥ 1      |
+| corretora       | str              | Nome da corretora onde o aporte foi realizado                    | Livre                      |
+| emissor         | str              | Nome do emissor do título                                        | Livre                      |
+| tipo            | str              | Tipo do título de renda fixa                                     | CDB, LCI, LCA              |
+| forma           | str              | Tipo do indexador do título                                      | Pós, Pré                   |
+| data_compra     | date             | Data em que o aporte foi realizado                               | AAAA-MM-DD                 |
+| data_vencimento | date             | Data de vencimento do título                                     | AAAA-MM-DD                 |
+| indexador       | str              | Indexador do título                                              | CDI, Pré, IPCA +           |
+| taxa            | float            | Taxa de juros do título                                          | Livre                      |
+| valor           | float            | Valor investido no título                                        | Livre                      |
+| reserva         | bool             | Flag indicando se é reserva de emergência                        | 0 (False), 1 (True)        |
 
 
-#### Resgates RF
+#### resgates_rf
 
 Cada linha representa um resgate em um título de renda fixa, com as seguintes colunas:
 
 | Nome         | Tipo de variável | Descrição                                                                 | Valores possíveis           |
 |--------------|------------------|---------------------------------------------------------------------------|-----------------------------|
-| ID           | int              | Identificador do título resgatado (igual ao ID do aporte correspondente)   | Inteiro sequencial ≥ 1      |
-| Data resgate | date             | Data em que o resgate foi realizado                                       | AAAA-MM-DD                  |
-| Valor        | float            | Valor resgatado, incluindo juros acumulados                               | Livre                       |
-| Final        | bool             | Flag indicando se o resgate foi total (final) ou parcial                  | True (total), False (parcial)|
+| id           | int              | Identificador do título resgatado (FK para aportes_rf)                    | Inteiro sequencial ≥ 1      |
+| data_resgate | date             | Data em que o resgate foi realizado                                       | AAAA-MM-DD                  |
+| valor        | float            | Valor resgatado, incluindo juros acumulados                               | Livre                       |
+| final        | bool             | Flag indicando se o resgate foi total (final) ou parcial                  | 0 (parcial), 1 (total)      |
 
 
-#### Transações RV
+#### transacoes_rv
 
 Cada linha representa uma transação (compra ou venda) em um ativo de renda variável, com as seguintes colunas:
 
 | Nome         | Tipo de variável | Descrição                                         | Valores possíveis         |
 |--------------|------------------|---------------------------------------------------|---------------------------|
-| Data         | date             | Data da transação                                 | AAAA-MM-DD                |
-| Código       | str              | Código de negociação do ativo                     | Livre                     |
-| Operação C/V | str              | Indica se é compra ou venda                       | C (compra), V (venda)     |
-| Quantidade   | int              | Quantidade de ativos negociados                   | Inteiro ≥ 1               |
-| Preço        | float            | Preço unitário do ativo                           | Livre                     |
-| Corretora    | str              | Nome da corretora                                 | Livre                     |
-| Taxas        | float            | Taxas associadas à transação                      | Livre                     |
+| data         | date             | Data da transação                                 | AAAA-MM-DD                |
+| codigo       | str              | Código de negociação do ativo                     | Livre                     |
+| operacao     | str              | Indica se é compra ou venda                       | C (compra), V (venda)     |
+| quantidade   | int              | Quantidade de ativos negociados                   | Inteiro ≥ 1               |
+| preco        | float            | Preço unitário do ativo                           | Livre                     |
+| corretora    | str              | Nome da corretora                                 | Livre                     |
+| taxas        | float            | Taxas associadas à transação                      | Livre                     |
 
 
-#### Proventos RV
+#### proventos_rv
 
 Cada linha representa um provento recebido de um ativo de renda variável, com as seguintes colunas:
 
-| Nome           | Tipo de variável | Descrição                                 | Valores possíveis |
-|----------------|------------------|-------------------------------------------|-------------------|
-| Data pagamento | date             | Data em que o provento foi pago           | AAAA-MM-DD        |
-| Código         | str              | Código de negociação do ativo             | Livre             |
-| Quantidade     | int              | Quantidade de ativos que geraram provento | Inteiro ≥ 1       |
-| Valor          | float            | Valor unitário do provento recebido       | Livre             |
-| Tipo           | str              | Tipo do provento                          | Rendimento        |
+| Nome            | Tipo de variável | Descrição                                 | Valores possíveis |
+|-----------------|------------------|-------------------------------------------|-------------------|
+| data_pagamento  | date             | Data em que o provento foi pago           | AAAA-MM-DD        |
+| codigo          | str              | Código de negociação do ativo             | Livre             |
+| quantidade      | int              | Quantidade de ativos que geraram provento | Inteiro ≥ 1       |
+| valor           | float            | Valor unitário do provento recebido       | Livre             |
+| tipo            | str              | Tipo do provento                          | Rendimento        |
 
 
-#### Ativos RV
+#### ativos_rv
 
 Cada linha representa um ativo de renda variável, com as seguintes colunas:
 
-| Nome      | Tipo de variável | Descrição                        | Valores possíveis      |
-|-----------|------------------|----------------------------------|------------------------|
-| Código    | str              | Código de negociação do ativo    | Livre                  |
-| Tipo      | str              | Tipo do ativo                    | Ação, ETF, FII         |
-| Benchmark | str              | Benchmark de comparação do ativo | Livre                  |
+| Nome      | Tipo de variável | Descrição                        | Valores possíveis        |
+|-----------|------------------|----------------------------------|--------------------------|
+| codigo    | str              | Código de negociação do ativo (PK)| Livre                    |
+| tipo      | str              | Tipo do ativo                    | Ação, ETF, FII, FI-Infra |
+| benchmark | str              | Benchmark de comparação do ativo | Livre                    |
 
 
-#### Proporções
+#### proporcoes
 
 Cada linha representa a proporção alvo de uma classe de ativos na carteira, com as seguintes colunas:
 
 | Nome      | Tipo de variável | Descrição                                         | Valores possíveis                                             |
 |-----------|------------------|---------------------------------------------------|---------------------------------------------------------------|
-| Classe    | str              | Classe de ativos                                  | Títulos CDI, FI-Infra CDI, ETF IMAB, Títulos IPCA+, FI-Infra IMAB, Títulos Pré, Ações Brasil, Ações Mundo |
-| Proporção | float            | Proporção alvo da classe de ativos na carteira (%)| 0.0 a 1.0 (percentual)                                        |
+| classe    | str              | Classe de ativos (PK)                             | Títulos CDI, FI-Infra CDI, ETF IMAB, Títulos IPCA+, FI-Infra IMAB, Títulos Pré, Ações Brasil, Ações Mundo |
+| proporcao | float            | Proporção alvo da classe de ativos na carteira (%)| 0.0 a 1.0 (percentual)                                        |

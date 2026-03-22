@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from indicadores import TickerBolsa
-from src.consolidacao_carteira import le_dados_excel
+from src.database import ler_ativos_rv
 
 
 def le_dados_indicadores() -> pd.DataFrame:
@@ -49,8 +49,8 @@ def cria_df_indicadores(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def cria_parquet_cotacoes():
-    ativos = le_dados_excel("Ativos RV")
-    codigos = ativos["Código"].unique()
+    ativos = ler_ativos_rv()
+    codigos = ativos["codigo"].unique()
 
     dfs_tickers = []
     for codigo in codigos:
