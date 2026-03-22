@@ -47,11 +47,11 @@ CREATE TABLE IF NOT EXISTS aportes_rf (
     id              INTEGER PRIMARY KEY,
     corretora       TEXT    NOT NULL,
     emissor         TEXT    NOT NULL,
-    tipo            TEXT    NOT NULL CHECK (tipo IN ('CDB', 'LCI', 'LCA')),
-    forma           TEXT    NOT NULL CHECK (forma IN ('Pós', 'Pré')),
+    tipo            TEXT    NOT NULL,
+    forma           TEXT    NOT NULL,
     data_compra     TEXT    NOT NULL,  -- YYYY-MM-DD
     data_vencimento TEXT    NOT NULL,  -- YYYY-MM-DD
-    indexador       TEXT    NOT NULL CHECK (indexador IN ('CDI', 'Pré', 'IPCA +')),
+    indexador       TEXT    NOT NULL,
     taxa            REAL    NOT NULL,
     valor           REAL    NOT NULL,
     reserva         INTEGER NOT NULL DEFAULT 0  -- 0=False, 1=True
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS transacoes_rv (
     rowid_          INTEGER PRIMARY KEY AUTOINCREMENT,
     data            TEXT    NOT NULL,  -- YYYY-MM-DD
     codigo          TEXT    NOT NULL,
-    operacao        TEXT    NOT NULL CHECK (operacao IN ('C', 'V')),
+    operacao        TEXT    NOT NULL,
     quantidade      INTEGER NOT NULL,
     preco           REAL    NOT NULL,
     corretora       TEXT    NOT NULL,
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS proventos_rv (
 
 CREATE TABLE IF NOT EXISTS ativos_rv (
     codigo          TEXT PRIMARY KEY,
-    tipo            TEXT NOT NULL CHECK (tipo IN ('ETF', 'FI-Infra')),
+    tipo            TEXT NOT NULL,
     benchmark       TEXT NOT NULL
 );
 
@@ -277,6 +277,16 @@ def inserir_proporcao(
             "VALUES (?, ?)",
             (classe, proporcao),
         )
+
+
+def atualizar_proporcoes(proporcoes: dict[str, float]) -> None:
+    """Atualiza as proporções existentes no banco."""
+    with conectar() as conn:
+        for classe, proporcao in proporcoes.items():
+            conn.execute(
+                "UPDATE proporcoes SET proporcao = ? WHERE classe = ?",
+                (proporcao, classe),
+            )
 
 
 # ---------------------------------------------------------------------------
