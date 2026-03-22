@@ -91,7 +91,7 @@ def criar_df_rebalanceamento(
     carteira_rf: pd.DataFrame,
     carteira_rv: pd.DataFrame,
     aporte_geral: float,
-    aportes_vals: list[float],
+    aportes_vals: pd.Series,
     proporcoes: pd.DataFrame,
 ) -> pd.DataFrame:
     # Mapeamento entre nomes da planilha e lógica de cálculo do valor atual
@@ -106,14 +106,14 @@ def criar_df_rebalanceamento(
         "Ações Mundo": carteira_rv.loc[carteira_rv["codigo"].eq("ACWI11"), "patrimonio"].sum(),
     }
 
-    df = proporcoes.copy()
-    df["valor_atual"] = df["classe"].map(lambda c: classe_to_valor_atual.get(c, 0.0))
+    df = proporcoes.copy().set_index("classe")
+    df["valor_atual"] = pd.Series(classe_to_valor_atual)
+    df["aportes_vals"] = aportes_vals
     df["porcent_atual"] = df["valor_atual"] / df["valor_atual"].sum()
-    total_com_aportes = df["valor_atual"].sum() + aporte_geral + sum(aportes_vals)
+    total_com_aportes = df["valor_atual"].sum() + aporte_geral + aportes_vals.sum()
     df["valor_alvo"] = df["proporcao"] * total_com_aportes
-    valor_com_aportes = df["valor_atual"] + pd.Series(aportes_vals)
-    df["delta"] = df["valor_alvo"] - valor_com_aportes
-    return df
+    df["delta"] = df["valor_alvo"] - df["valor_atual"] - df["aportes_vals"]
+    return df.reset_index().drop(columns=["aportes_vals"])
 
 
 @st.cache_resource
