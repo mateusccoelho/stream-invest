@@ -48,7 +48,7 @@ def pagina_operacoes():
         "Proporções",
     ])
 
-    # ===== ABA 1 – Aporte RF ===============================================
+    # Aporte RF
     with tabs[0]:
         st.markdown("### Novo aporte de renda fixa")
         prox_id = proximo_id_aporte_rf()
@@ -74,28 +74,9 @@ def pagina_operacoes():
             submitted = st.form_submit_button("💾 Cadastrar aporte", use_container_width=True)
 
             if submitted:
-                erros = []
-                if not corretora:
-                    erros.append("Corretora")
-                if not emissor:
-                    erros.append("Emissor")
-                if tipo_rf is None:
-                    erros.append("Tipo")
-                if forma is None:
-                    erros.append("Forma")
-                if indexador is None:
-                    erros.append("Indexador")
-                if taxa is None:
-                    erros.append("Taxa")
-                if data_compra is None:
-                    erros.append("Data de compra")
-                if data_vencimento is None:
-                    erros.append("Data de vencimento")
-                if valor is None or valor <= 0:
-                    erros.append("Valor")
-
-                if erros:
-                    st.error(f"Preencha os campos obrigatórios: {', '.join(erros)}.")
+                required = [corretora, emissor, tipo_rf, forma, indexador, taxa, data_compra, data_vencimento, valor]
+                if any(x is None or x == "" or (isinstance(x, (int, float)) and x <= 0) for x in required):
+                    st.error("Preencha todos os campos obrigatórios.")
                 elif data_vencimento <= data_compra:
                     st.error("Data de vencimento deve ser posterior à data de compra.")
                 else:
@@ -113,7 +94,7 @@ def pagina_operacoes():
                     )
                     st.success(f"Aporte cadastrado com ID **{novo_id}**!")
 
-    # ===== ABA 2 – Resgate RF ==============================================
+    # Resgate RF
     with tabs[1]:
         st.markdown("### Novo resgate de renda fixa")
 
@@ -141,16 +122,9 @@ def pagina_operacoes():
                 submitted = st.form_submit_button("💾 Cadastrar resgate", use_container_width=True)
 
                 if submitted:
-                    erros = []
-                    if id_resgate is None:
-                        erros.append("ID do aporte")
-                    if data_resgate is None:
-                        erros.append("Data do resgate")
-                    if valor_resgate is None or valor_resgate <= 0:
-                        erros.append("Valor resgatado")
-
-                    if erros:
-                        st.error(f"Preencha os campos obrigatórios: {', '.join(erros)}.")
+                    required = [id_resgate, data_resgate, valor_resgate]
+                    if any(x is None or x == "" or (isinstance(x, (int, float)) and x <= 0) for x in required):
+                        st.error("Preencha todos os campos obrigatórios.")
                     else:
                         inserir_resgate_rf(
                             id_aporte=id_resgate,
@@ -163,7 +137,7 @@ def pagina_operacoes():
                             f"**{id_resgate}** cadastrado!"
                         )
 
-    # ===== ABA 3 – Transação RV ============================================
+    # Transação RV
     with tabs[2]:
         st.markdown("### Nova transação de renda variável")
 
@@ -190,22 +164,9 @@ def pagina_operacoes():
             submitted = st.form_submit_button("💾 Cadastrar transação", use_container_width=True)
 
             if submitted:
-                erros = []
-                if data_trans is None:
-                    erros.append("Data")
-                if not codigo_trans:
-                    erros.append("Código do ativo")
-                if operacao is None:
-                    erros.append("Operação")
-                if not corretora_rv:
-                    erros.append("Corretora")
-                if qtd_trans is None or qtd_trans <= 0:
-                    erros.append("Quantidade")
-                if preco_trans is None or preco_trans <= 0:
-                    erros.append("Preço unitário")
-
-                if erros:
-                    st.error(f"Preencha os campos obrigatórios: {', '.join(erros)}.")
+                required = [data_trans, codigo_trans, operacao, corretora_rv, qtd_trans, preco_trans]
+                if any(x is None or x == "" or (isinstance(x, (int, float)) and x <= 0) for x in required):
+                    st.error("Preencha todos os campos obrigatórios.")
                 else:
                     inserir_transacao_rv(
                         data=data_trans,
@@ -222,7 +183,7 @@ def pagina_operacoes():
                         f"de **{qtd_trans}x {codigo_trans}** ({formatar_dinheiro(valor_total)}) cadastrada!"
                     )
 
-    # ===== ABA 4 – Provento RV =============================================
+    # Provento RV
     with tabs[3]:
         st.markdown("### Novo provento de renda variável")
 
@@ -242,20 +203,9 @@ def pagina_operacoes():
             submitted = st.form_submit_button("💾 Cadastrar provento", use_container_width=True)
 
             if submitted:
-                erros = []
-                if data_prov is None:
-                    erros.append("Data de pagamento")
-                if not codigo_prov:
-                    erros.append("Código do ativo")
-                if qtd_prov is None or qtd_prov <= 0:
-                    erros.append("Quantidade")
-                if valor_prov is None or valor_prov <= 0:
-                    erros.append("Valor unitário")
-                if tipo_prov is None:
-                    erros.append("Tipo")
-
-                if erros:
-                    st.error(f"Preencha os campos obrigatórios: {', '.join(erros)}.")
+                required = [data_prov, codigo_prov, qtd_prov, valor_prov, tipo_prov]
+                if any(x is None or x == "" or (isinstance(x, (int, float)) and x <= 0) for x in required):
+                    st.error("Preencha todos os campos obrigatórios.")
                 else:
                     inserir_provento_rv(
                         data_pagamento=data_prov,
@@ -269,7 +219,7 @@ def pagina_operacoes():
                         f"({formatar_dinheiro(qtd_prov * valor_prov)}) cadastrado!"
                     )
 
-    # ===== ABA 5 – Ativo RV ================================================
+    # Ativo RV
     with tabs[4]:
         st.markdown("### Cadastrar / atualizar ativo de renda variável")
 
@@ -282,16 +232,9 @@ def pagina_operacoes():
             submitted = st.form_submit_button("💾 Cadastrar ativo", use_container_width=True)
 
             if submitted:
-                erros = []
-                if not codigo_ativo:
-                    erros.append("Código do ativo")
-                if tipo_ativo is None:
-                    erros.append("Tipo")
-                if not benchmark:
-                    erros.append("Benchmark")
-
-                if erros:
-                    st.error(f"Preencha os campos obrigatórios: {', '.join(erros)}.")
+                required = [codigo_ativo, tipo_ativo, benchmark]
+                if any(x is None or x == "" for x in required):
+                    st.error("Preencha todos os campos obrigatórios.")
                 else:
                     inserir_ativo_rv(
                         codigo=codigo_ativo.upper(),
@@ -300,7 +243,7 @@ def pagina_operacoes():
                     )
                     st.success(f"Ativo **{codigo_ativo.upper()}** cadastrado/atualizado!")
 
-    # ===== ABA 6 – Proporções ==============================================
+    # Proporções
     with tabs[5]:
         st.markdown("### Proporções alvo da carteira")
 
