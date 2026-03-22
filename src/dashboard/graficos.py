@@ -142,15 +142,15 @@ def plotar_rendimento(rendimento: pd.DataFrame) -> go.Figure:
     rendimento["retorno"] = (rendimento["retorno"].cumprod() - 1) * 100
     rendimento["cdi"] = (rendimento["cdi"].cumprod() - 1) * 100
     rendimento = rendimento.melt(
-        id_vars=["data"], 
-        value_vars=["retorno", "cdi"], 
-        var_name="tipo", 
-        value_name="rendimento"
+        id_vars=["data"],
+        value_vars=["retorno", "cdi"],
+        var_name="tipo",
+        value_name="rendimento",
     )
-    rendimento["tipo"] = rendimento["tipo"].replace({
-        "retorno": "Carteira", "cdi": "CDI"
-    })
-    
+    rendimento["tipo"] = rendimento["tipo"].replace(
+        {"retorno": "Carteira", "cdi": "CDI"}
+    )
+
     fig = px.line(
         rendimento,
         x="data",
@@ -165,4 +165,3 @@ def plotar_rendimento(rendimento: pd.DataFrame) -> go.Figure:
         hovermode="x unified",
     )
     return fig
-    

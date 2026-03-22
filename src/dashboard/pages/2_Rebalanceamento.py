@@ -62,7 +62,10 @@ def pagina_rebalanceamento(
     aportes_dict = st.session_state[APORTES_KEY]
     if aportes_dict:
         resumo = pd.DataFrame(
-            [{"Classe": k, "Valor": formatar_dinheiro(v)} for k, v in aportes_dict.items()]
+            [
+                {"Classe": k, "Valor": formatar_dinheiro(v)}
+                for k, v in aportes_dict.items()
+            ]
         )
         st.dataframe(resumo, hide_index=True, use_container_width=True)
     else:

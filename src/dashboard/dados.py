@@ -96,14 +96,33 @@ def criar_df_rebalanceamento(
 ) -> pd.DataFrame:
     # Mapeamento entre nomes da planilha e lógica de cálculo do valor atual
     classe_to_valor_atual = {
-        "Títulos CDI": carteira_rf.loc[carteira_rf["index"].eq("CDI") & (~carteira_rf["reserva"]), "saldo"].sum(),
-        "FI-Infra CDI": carteira_rv.loc[(carteira_rv["tipo_ativo"].eq("FI-Infra")) & (carteira_rv["bench"].eq("CDI")), "patrimonio"].sum(),
-        "ETF IMAB": carteira_rv.loc[(carteira_rv["tipo_ativo"].eq("ETF")) & (carteira_rv["bench"].eq("IMAB 5")), "patrimonio"].sum(),
-        "Títulos IPCA+": carteira_rf.loc[carteira_rf["index"].eq("IPCA +"), "saldo"].sum(),
-        "FI-Infra IMAB": carteira_rv.loc[(carteira_rv["tipo_ativo"].eq("FI-Infra")) & (carteira_rv["bench"].eq("IMAB 5")), "patrimonio"].sum(),
+        "Títulos CDI": carteira_rf.loc[
+            carteira_rf["index"].eq("CDI") & (~carteira_rf["reserva"]), "saldo"
+        ].sum(),
+        "FI-Infra CDI": carteira_rv.loc[
+            (carteira_rv["tipo_ativo"].eq("FI-Infra"))
+            & (carteira_rv["bench"].eq("CDI")),
+            "patrimonio",
+        ].sum(),
+        "ETF IMAB": carteira_rv.loc[
+            (carteira_rv["tipo_ativo"].eq("ETF")) & (carteira_rv["bench"].eq("IMAB 5")),
+            "patrimonio",
+        ].sum(),
+        "Títulos IPCA+": carteira_rf.loc[
+            carteira_rf["index"].eq("IPCA +"), "saldo"
+        ].sum(),
+        "FI-Infra IMAB": carteira_rv.loc[
+            (carteira_rv["tipo_ativo"].eq("FI-Infra"))
+            & (carteira_rv["bench"].eq("IMAB 5")),
+            "patrimonio",
+        ].sum(),
         "Títulos Pré": carteira_rf.loc[carteira_rf["index"].eq("Pré"), "saldo"].sum(),
-        "Ações Brasil": carteira_rv.loc[carteira_rv["codigo"].eq("PIBB11"), "patrimonio"].sum(),
-        "Ações Mundo": carteira_rv.loc[carteira_rv["codigo"].eq("ACWI11"), "patrimonio"].sum(),
+        "Ações Brasil": carteira_rv.loc[
+            carteira_rv["codigo"].eq("PIBB11"), "patrimonio"
+        ].sum(),
+        "Ações Mundo": carteira_rv.loc[
+            carteira_rv["codigo"].eq("ACWI11"), "patrimonio"
+        ].sum(),
     }
 
     df = proporcoes.copy().set_index("classe")
@@ -245,7 +264,9 @@ def calcular_mov_diaria(
 def calcular_mov_mensal(mov_diaria: pd.DataFrame) -> pd.DataFrame:
     mov_diaria = mov_diaria.copy()
     mov_diaria["data"] = mov_diaria["data"].dt.to_period("M").dt.to_timestamp()
-    mov_mensal = mov_diaria.groupby(["data", "tipo"], as_index=False)["valor_trans"].sum()
+    mov_mensal = mov_diaria.groupby(["data", "tipo"], as_index=False)[
+        "valor_trans"
+    ].sum()
     return mov_mensal
 
 
@@ -345,8 +366,8 @@ def calcular_rendimento_diario(
     patrimonio = patrimonio.merge(mov, on="data", how="left")
     patrimonio["fluxo"] = patrimonio["fluxo"].fillna(0)
     patrimonio["saldo_ant"] = patrimonio["saldo"].shift(1).fillna(0)
-    patrimonio['retorno'] = (
-        patrimonio['saldo'] / (patrimonio['saldo_ant'] + patrimonio['fluxo'])
+    patrimonio["retorno"] = (
+        patrimonio["saldo"] / (patrimonio["saldo_ant"] + patrimonio["fluxo"])
     ).fillna(1)
 
     cotacoes = cotacoes.copy()
@@ -357,4 +378,3 @@ def calcular_rendimento_diario(
 
     patrimonio = patrimonio.merge(cotacoes, on="data", how="left")
     return patrimonio
-    
