@@ -54,7 +54,7 @@ def pagina_patrimonio(
     por_ativo = st.checkbox("Mostrar por ativo")
     st.plotly_chart(
         plotar_patrimonio_total(patrimonio_total, por_ativo=por_ativo),
-        use_container_width=True,
+        width="stretch",
     )
 
     st.markdown("### ETFs")
@@ -62,7 +62,7 @@ def pagina_patrimonio(
     mostrar_metricas(calcular_metricas_rend(etfs, "rv"))
     etfs_fmt, etfs_config = formatar_df_renda_var(etfs)
     st.dataframe(
-        etfs_fmt, column_config=etfs_config, hide_index=True, use_container_width=True
+        etfs_fmt, column_config=etfs_config, hide_index=True, width="stretch"
     )
 
     st.markdown("### FI-Infra")
@@ -73,7 +73,7 @@ def pagina_patrimonio(
         fi_infra_fmt,
         column_config=fi_infra_config,
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
     )
 
     st.markdown("### Renda fixa")
@@ -84,7 +84,7 @@ def pagina_patrimonio(
         df_rf_fmt,
         column_config=df_rf_config,
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
     )
 
     st.markdown("### Movimentações")
@@ -94,10 +94,10 @@ def pagina_patrimonio(
     for idx, metrica in enumerate(calcular_metricas_mov(mov_mensal)):
         cols[idx].metric(label=titulos[idx], value=formatar_dinheiro(metrica))
 
-    st.plotly_chart(plotar_movimentacoes(mov_mensal), use_container_width=True)
+    st.plotly_chart(plotar_movimentacoes(mov_mensal), width="stretch")
 
     st.markdown("### Rendimento diário")
-    st.plotly_chart(plotar_rendimento(rendimento), use_container_width=True)
+    st.plotly_chart(plotar_rendimento(rendimento), width="stretch")
 
 
 st.set_page_config(

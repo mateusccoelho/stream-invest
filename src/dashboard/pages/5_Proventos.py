@@ -54,7 +54,7 @@ def pagina_proventos(proventos: pd.DataFrame):
         prov_ativo_form,
         column_config=prov_ativo_config,
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
     )
 
     st.markdown("### Detalhes")
@@ -62,7 +62,7 @@ def pagina_proventos(proventos: pd.DataFrame):
         proventos_form,
         column_config=proventos_config,
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
     )
 
 

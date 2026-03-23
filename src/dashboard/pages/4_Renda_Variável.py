@@ -41,7 +41,7 @@ def pagina_renda_variavel(renda_var_df: pd.DataFrame, transacoes: pd.DataFrame):
 
     df_formatado.insert(0, "", False)
     df_editado = st.data_editor(
-        df_formatado, column_config=rv_config, hide_index=True, use_container_width=True
+        df_formatado, column_config=rv_config, hide_index=True, width="stretch"
     )
 
     st.markdown("### Transações")
@@ -58,7 +58,7 @@ def pagina_renda_variavel(renda_var_df: pd.DataFrame, transacoes: pd.DataFrame):
             trans_fmt,
             column_config=trans_config,
             hide_index=True,
-            use_container_width=True,
+            width="stretch",
         )
 
 

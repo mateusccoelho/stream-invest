@@ -52,10 +52,10 @@ def pagina_rebalanceamento(
     valor_aporte = input_cols[1].number_input(
         "Valor", min_value=0.0, step=0.01, format="%.2f", label_visibility="collapsed"
     )
-    if input_cols[2].button("➕ Adicionar", use_container_width=True):
+    if input_cols[2].button("➕ Adicionar", width="stretch"):
         if valor_aporte > 0:
             _adicionar_aporte(classe_sel, valor_aporte)
-    if input_cols[3].button("🗑️ Limpar", use_container_width=True):
+    if input_cols[3].button("🗑️ Limpar", width="stretch"):
         _limpar_aportes()
 
     aportes_dict = st.session_state[APORTES_KEY]
@@ -69,7 +69,7 @@ def pagina_rebalanceamento(
                 "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f")
             },
             hide_index=True,
-            use_container_width=True,
+            width="stretch",
         )
     else:
         st.caption("Nenhum aporte adicionado.")
@@ -89,7 +89,7 @@ def pagina_rebalanceamento(
         rebalanc_form,
         column_config=rebalanc_config,
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
     )
 
     # Métricas e patrimônio externo

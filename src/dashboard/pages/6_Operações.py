@@ -83,7 +83,7 @@ def pagina_operacoes():
 
             reserva = st.checkbox("Reserva de emergência")
             submitted = st.form_submit_button(
-                "💾 Cadastrar aporte", use_container_width=True
+                "💾 Cadastrar aporte", width="stretch"
             )
 
             if submitted:
@@ -150,7 +150,7 @@ def pagina_operacoes():
                         ]
                     ],
                     hide_index=True,
-                    use_container_width=True,
+                    width="stretch",
                 )
 
             with st.form("form_resgate_rf", clear_on_submit=True):
@@ -166,7 +166,7 @@ def pagina_operacoes():
                 )
                 final = st.checkbox("Resgate total (final)")
                 submitted = st.form_submit_button(
-                    "💾 Cadastrar resgate", use_container_width=True
+                    "💾 Cadastrar resgate", width="stretch"
                 )
 
                 if submitted:
@@ -226,7 +226,7 @@ def pagina_operacoes():
             )
 
             submitted = st.form_submit_button(
-                "💾 Cadastrar transação", use_container_width=True
+                "💾 Cadastrar transação", width="stretch"
             )
 
             if submitted:
@@ -286,7 +286,7 @@ def pagina_operacoes():
 
             tipo_prov = st.selectbox("Tipo", TIPOS_PROVENTO_RV, index=None)
             submitted = st.form_submit_button(
-                "💾 Cadastrar provento", use_container_width=True
+                "💾 Cadastrar provento", width="stretch"
             )
 
             if submitted:
@@ -321,7 +321,7 @@ def pagina_operacoes():
             benchmark = cols[2].text_input("Benchmark")
 
             submitted = st.form_submit_button(
-                "💾 Cadastrar ativo", use_container_width=True
+                "💾 Cadastrar ativo", width="stretch"
             )
 
             if submitted:
@@ -361,11 +361,11 @@ def pagina_operacoes():
                     ),
                 },
                 hide_index=True,
-                use_container_width=True,
+                width="stretch",
                 num_rows="fixed",
             )
 
-            if st.button("💾 Salvar proporções", use_container_width=True):
+            if st.button("💾 Salvar proporções", width="stretch"):
                 novos_valores = dict(zip(editado["classe"], editado["proporcao"]))
                 atualizar_proporcoes(novos_valores)
                 st.success("Proporções atualizadas!")

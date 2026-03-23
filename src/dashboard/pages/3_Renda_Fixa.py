@@ -49,7 +49,7 @@ def pagina_renda_fixa(
         df_rf_formatado,
         column_config=rf_config,
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
     )
 
     st.markdown("### Estudo de taxas CDI")
@@ -61,14 +61,14 @@ def pagina_renda_fixa(
         df_taxas_fmt,
         column_config=taxas_config,
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
     )
     cols[1].markdown("##### Agregado")
     cols[1].dataframe(
         df_taxas_agg_fmt,
         column_config=taxas_agg_config,
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
     )
 
     st.markdown("### Emissores")
@@ -78,7 +78,7 @@ def pagina_renda_fixa(
         "Exposição máxima",
         formatar_dinheiro(renda_fixa_df.groupby("emissor")["saldo"].sum().max()),
     )
-    st.plotly_chart(plotar_emissores(renda_fixa_df), use_container_width=True)
+    st.plotly_chart(plotar_emissores(renda_fixa_df), width="stretch")
 
     st.markdown("### Rentabilidade")
     if df_rf_editado[""].sum() == 0:
