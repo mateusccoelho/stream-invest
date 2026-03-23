@@ -1,9 +1,15 @@
 import locale
+from typing import Tuple
 
 import pandas as pd
+import streamlit as st
 
 locale.setlocale(locale.LC_ALL, "pt_BR")
 
+DfComConfig = Tuple[pd.DataFrame, dict]
+
+
+# Formatação de valores individuais (para métricas, textos)
 
 def formatar_dinheiro(valor: float) -> str:
     return locale.currency(valor, grouping=True, symbol="R$")
@@ -13,17 +19,31 @@ def formatar_porcentagem(valor: float) -> str:
     return "{:.2f}%".format(valor * 100)
 
 
-def formatar_df_proventos_ativo(df: pd.DataFrame) -> pd.DataFrame:
+# Helpers para column_config
+
+def _col_dinheiro(label: str) -> st.column_config.NumberColumn:
+    return st.column_config.NumberColumn(label, format="R$ %.2f")
+
+
+def _col_porcentagem(label: str) -> st.column_config.NumberColumn:
+    return st.column_config.NumberColumn(label, format="%.2f%%")
+
+
+def _col_data(label: str) -> st.column_config.DateColumn:
+    return st.column_config.DateColumn(label, format="DD/MM/YYYY")
+
+
+# Funções de formatação de DataFrames
+
+
+def formatar_df_proventos_ativo(df: pd.DataFrame) -> DfComConfig:
     df = df.copy()
 
     for col in ["ultimo_pag"]:
-        df[col] = pd.to_datetime(df[col]).dt.strftime("%d/%m/%Y")
-
-    for col in ["total"]:
-        df[col] = df[col].apply(formatar_dinheiro)
+        df[col] = pd.to_datetime(df[col])
 
     for col in ["yoc_periodo"]:
-        df[col] = df[col].apply(formatar_porcentagem)
+        df[col] = df[col] * 100
 
     df = df.filter(
         ["codigo", "tipo_ativo", "total", "yoc_periodo", "qtd", "ultimo_pag"]
@@ -37,20 +57,23 @@ def formatar_df_proventos_ativo(df: pd.DataFrame) -> pd.DataFrame:
             "yoc_periodo": "YoC período",
         }
     )
-    return df
+
+    column_config = {
+        "Total recebido/provisionado": _col_dinheiro("Total recebido/provisionado"),
+        "YoC período": _col_porcentagem("YoC período"),
+        "Último pagamento": _col_data("Último pagamento"),
+    }
+    return df, column_config
 
 
-def formatar_df_proventos(df: pd.DataFrame) -> pd.DataFrame:
+def formatar_df_proventos(df: pd.DataFrame) -> DfComConfig:
     df = df.copy()
 
     for col in ["dt_pag"]:
-        df[col] = pd.to_datetime(df[col]).dt.strftime("%d/%m/%Y")
-
-    for col in ["valor", "total"]:
-        df[col] = df[col].apply(formatar_dinheiro)
+        df[col] = pd.to_datetime(df[col])
 
     for col in ["yoc_anualizado"]:
-        df[col] = df[col].apply(formatar_porcentagem)
+        df[col] = df[col] * 100
 
     df = df.filter(
         ["dt_pag", "codigo", "qtd", "valor", "yoc_anualizado", "total", "tipo"]
@@ -65,17 +88,21 @@ def formatar_df_proventos(df: pd.DataFrame) -> pd.DataFrame:
             "yoc_anualizado": "YoC anualizado",
         }
     )
-    return df
+
+    column_config = {
+        "Valor": _col_dinheiro("Valor"),
+        "Total": _col_dinheiro("Total"),
+        "YoC anualizado": _col_porcentagem("YoC anualizado"),
+        "Data de pagamento": _col_data("Data de pagamento"),
+    }
+    return df, column_config
 
 
-def formatar_df_rebalanceamento(df: pd.DataFrame) -> pd.DataFrame:
+def formatar_df_rebalanceamento(df: pd.DataFrame) -> DfComConfig:
     df = df.copy()
 
     for col in ["proporcao", "porcent_atual"]:
-        df[col] = df[col].apply(formatar_porcentagem)
-
-    for col in ["valor_alvo", "valor_atual", "delta"]:
-        df[col] = df[col].apply(formatar_dinheiro)
+        df[col] = df[col] * 100
 
     df = df.rename(
         columns={
@@ -87,10 +114,18 @@ def formatar_df_rebalanceamento(df: pd.DataFrame) -> pd.DataFrame:
             "delta": "Investir",
         }
     )
-    return df
+
+    column_config = {
+        "Porcentagem alvo": _col_porcentagem("Porcentagem alvo"),
+        "Porcentagem atual": _col_porcentagem("Porcentagem atual"),
+        "Valor alvo": _col_dinheiro("Valor alvo"),
+        "Valor atual": _col_dinheiro("Valor atual"),
+        "Investir": _col_dinheiro("Investir"),
+    }
+    return df, column_config
 
 
-def formatar_df_renda_fixa(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
+def formatar_df_renda_fixa(df: pd.DataFrame, inativos=False) -> DfComConfig:
     df = df.copy()
 
     for col in ["data_compra", "data_venc", "data_atualizacao"]:
@@ -98,17 +133,10 @@ def formatar_df_renda_fixa(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
 
     df = df.sort_values("data_venc")
 
-    # Esse tratamento separado é necessário pois não pode ser executado antes da
-    # ordenação por data de vencimento.
-    for col in ["data_compra", "data_venc", "data_atualizacao"]:
-        df[col] = df[col].dt.strftime("%d/%m/%Y")
-
     for col in ["taxa", "retorno"]:
-        df[col] = df[col].apply(formatar_porcentagem)
-    df["status"] = df["status"].map({1: "Sim", 0: "Não"})
+        df[col] = df[col] * 100
 
-    for col in ["valor", "saldo", "rendimentos_bruto", "resgates"]:
-        df[col] = df[col].apply(formatar_dinheiro)
+    df["status"] = df["status"].map({1: "Sim", 0: "Não"})
 
     df = df.reset_index().rename(
         columns={
@@ -147,22 +175,30 @@ def formatar_df_renda_fixa(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
     if inativos:
         cols_to_show.append("Ativo")
 
-    return df.filter(cols_to_show)
+    column_config = {
+        "Taxa": _col_porcentagem("Taxa"),
+        "Retorno": _col_porcentagem("Retorno"),
+        "Investido": _col_dinheiro("Investido"),
+        "Saldo": _col_dinheiro("Saldo"),
+        "Rendimentos": _col_dinheiro("Rendimentos"),
+        "Resgates": _col_dinheiro("Resgates"),
+        "Compra": _col_data("Compra"),
+        "Vencimento": _col_data("Vencimento"),
+        "Atualização": _col_data("Atualização"),
+    }
+    return df.filter(cols_to_show), column_config
 
 
-def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
+def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> DfComConfig:
     df = df.copy().reset_index().sort_values("bench")
 
     for col in ["data"]:
-        df[col] = pd.to_datetime(df[col]).dt.strftime("%d/%m/%Y")
-
-    for col in ["preco_medio", "preco_atual", "rendimento_total", "patrimonio"]:
-        df[col] = df[col].apply(formatar_dinheiro)
+        df[col] = pd.to_datetime(df[col])
 
     for col in ["retorno"]:
-        df[col] = df[col].apply(formatar_porcentagem)
+        df[col] = df[col] * 100
 
-    return df.filter(
+    df = df.filter(
         [
             "codigo",
             "tipo",
@@ -190,36 +226,46 @@ def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> pd.DataFrame:
         }
     )
 
+    column_config = {
+        "Preço médio": _col_dinheiro("Preço médio"),
+        "Preço atual": _col_dinheiro("Preço atual"),
+        "Variação total": _col_dinheiro("Variação total"),
+        "Patrimônio": _col_dinheiro("Patrimônio"),
+        "Retorno": _col_porcentagem("Retorno"),
+        "Atualização": _col_data("Atualização"),
+    }
+    return df, column_config
 
-def formatar_df_resgates(resgates: pd.DataFrame) -> pd.DataFrame:
+
+def formatar_df_resgates(resgates: pd.DataFrame) -> DfComConfig:
     resgates = resgates.copy()
 
     for col in ["data_resgate"]:
-        resgates[col] = pd.to_datetime(resgates[col]).dt.strftime("%d/%m/%Y")
+        resgates[col] = pd.to_datetime(resgates[col])
 
-    for col in ["valor"]:
-        resgates[col] = resgates[col].apply(formatar_dinheiro)
-
-    return resgates.filter(["data_resgate", "valor"]).rename(
+    resgates = resgates.filter(["data_resgate", "valor"]).rename(
         columns={
             "data_resgate": "Data",
             "valor": "Valor",
         }
     )
 
+    column_config = {
+        "Valor": _col_dinheiro("Valor"),
+        "Data": _col_data("Data"),
+    }
+    return resgates, column_config
 
-def formatar_transacoes_rv(df: pd.DataFrame) -> pd.DataFrame:
+
+def formatar_transacoes_rv(df: pd.DataFrame) -> DfComConfig:
     df = df.copy()
 
     for col in ["data"]:
-        df[col] = pd.to_datetime(df[col]).dt.strftime("%d/%m/%Y")
-
-    for col in ["preco", "taxas"]:
-        df[col] = df[col].apply(formatar_dinheiro)
+        df[col] = pd.to_datetime(df[col])
 
     df["tipo"] = df["tipo"].replace({"C": "Compra", "V": "Venda"})
 
-    return df.filter(
+    df = df.filter(
         ["codigo", "data", "tipo", "qtd", "preco", "taxas", "corretora"]
     ).rename(
         columns={
@@ -233,17 +279,21 @@ def formatar_transacoes_rv(df: pd.DataFrame) -> pd.DataFrame:
         }
     )
 
+    column_config = {
+        "Preço": _col_dinheiro("Preço"),
+        "Taxa total": _col_dinheiro("Taxa total"),
+        "Data": _col_data("Data"),
+    }
+    return df, column_config
 
-def formatar_df_taxas(df: pd.DataFrame) -> pd.DataFrame:
+
+def formatar_df_taxas(df: pd.DataFrame) -> DfComConfig:
     df = df.copy()
 
     for col in ["taxa", "taxa_desc"]:
-        df[col] = df[col].apply(formatar_porcentagem)
+        df[col] = df[col] * 100
 
-    for col in ["valor"]:
-        df[col] = df[col].apply(formatar_dinheiro)
-
-    return df.filter(
+    df = df.filter(
         ["id", "tipo", "faixa_prazo", "taxa", "taxa_desc", "valor"]
     ).rename(
         columns={
@@ -256,17 +306,21 @@ def formatar_df_taxas(df: pd.DataFrame) -> pd.DataFrame:
         }
     )
 
+    column_config = {
+        "Taxa": _col_porcentagem("Taxa"),
+        "Taxa descontada": _col_porcentagem("Taxa descontada"),
+        "Valor": _col_dinheiro("Valor"),
+    }
+    return df, column_config
 
-def formatar_df_taxas_agg(df: pd.DataFrame) -> pd.DataFrame:
+
+def formatar_df_taxas_agg(df: pd.DataFrame) -> DfComConfig:
     df = df.copy()
 
     for col in ["proporcao", "taxa_media", "taxa_alvo"]:
-        df[col] = df[col].apply(formatar_porcentagem)
+        df[col] = df[col] * 100
 
-    for col in ["valor"]:
-        df[col] = df[col].apply(formatar_dinheiro)
-
-    return df.rename(
+    df = df.rename(
         columns={
             "faixa_prazo": "Prazo",
             "proporcao": "Proporção",
@@ -275,3 +329,11 @@ def formatar_df_taxas_agg(df: pd.DataFrame) -> pd.DataFrame:
             "taxa_alvo": "Taxa alvo",
         }
     )
+
+    column_config = {
+        "Proporção": _col_porcentagem("Proporção"),
+        "Taxa média": _col_porcentagem("Taxa média"),
+        "Taxa alvo": _col_porcentagem("Taxa alvo"),
+        "Valor": _col_dinheiro("Valor"),
+    }
+    return df, column_config

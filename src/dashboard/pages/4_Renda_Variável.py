@@ -34,13 +34,13 @@ def pagina_renda_variavel(renda_var_df: pd.DataFrame, transacoes: pd.DataFrame):
         if not inativos:
             renda_var_df = renda_var_df[renda_var_df["qtd"].gt(0)]
 
-    df_formatado = formatar_df_renda_var(renda_var_df, inativos)
+    df_formatado, rv_config = formatar_df_renda_var(renda_var_df, inativos)
 
     st.markdown("# Renda Variável")
     mostrar_metricas(calcular_metricas_rend(renda_var_df, "rv"))
 
     df_formatado.insert(0, "", False)
-    df_editado = st.data_editor(df_formatado, hide_index=True, use_container_width=True)
+    df_editado = st.data_editor(df_formatado, column_config=rv_config, hide_index=True, use_container_width=True)
 
     st.markdown("### Transações")
     if df_editado[""].sum() == 0:
@@ -51,8 +51,9 @@ def pagina_renda_variavel(renda_var_df: pd.DataFrame, transacoes: pd.DataFrame):
 
         mostrar_metricas_trans(calcular_metricas_trans_rv(trans_id))
 
+        trans_fmt, trans_config = formatar_transacoes_rv(trans_id)
         st.dataframe(
-            formatar_transacoes_rv(trans_id), hide_index=True, use_container_width=True
+            trans_fmt, column_config=trans_config, hide_index=True, use_container_width=True
         )
 
 

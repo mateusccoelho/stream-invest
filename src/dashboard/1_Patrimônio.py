@@ -60,20 +60,22 @@ def pagina_patrimonio(
     st.markdown("### ETFs")
     etfs = renda_var_df.loc[renda_var_df["tipo_ativo"].eq("ETF")]
     mostrar_metricas(calcular_metricas_rend(etfs, "rv"))
-    st.dataframe(formatar_df_renda_var(etfs), hide_index=True, use_container_width=True)
+    etfs_fmt, etfs_config = formatar_df_renda_var(etfs)
+    st.dataframe(etfs_fmt, column_config=etfs_config, hide_index=True, use_container_width=True)
 
     st.markdown("### FI-Infra")
     fiinfra = renda_var_df.loc[renda_var_df["tipo_ativo"].eq("FI-Infra")]
     mostrar_metricas(calcular_metricas_rend(fiinfra, "rv"))
-    st.dataframe(
-        formatar_df_renda_var(fiinfra), hide_index=True, use_container_width=True
-    )
+    fi_infra_fmt, fi_infra_config = formatar_df_renda_var(fiinfra)
+    st.dataframe(fi_infra_fmt, column_config=fi_infra_config, hide_index=True, use_container_width=True)
 
     st.markdown("### Renda fixa")
     df_rf = renda_fixa_df.loc[renda_fixa_df["status"].eq(1)]
     mostrar_metricas(calcular_metricas_rend(df_rf, "rf"))
+    df_rf_fmt, df_rf_config = formatar_df_renda_fixa(df_rf, inativos=False)
     st.dataframe(
-        formatar_df_renda_fixa(df_rf, inativos=False),
+        df_rf_fmt,
+        column_config=df_rf_config,
         hide_index=True,
         use_container_width=True,
     )

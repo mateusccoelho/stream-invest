@@ -61,12 +61,14 @@ def pagina_rebalanceamento(
     aportes_dict = st.session_state[APORTES_KEY]
     if aportes_dict:
         resumo = pd.DataFrame(
-            [
-                {"Classe": k, "Valor": formatar_dinheiro(v)}
-                for k, v in aportes_dict.items()
-            ]
+            [{"Classe": k, "Valor": v} for k, v in aportes_dict.items()]
         )
-        st.dataframe(resumo, hide_index=True, use_container_width=True)
+        st.dataframe(
+            resumo,
+            column_config={"Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f")},
+            hide_index=True,
+            use_container_width=True,
+        )
     else:
         st.caption("Nenhum aporte adicionado.")
 
@@ -77,11 +79,11 @@ def pagina_rebalanceamento(
     rebalanc = criar_df_rebalanceamento(
         carteira_rf, carteira_rv, aporte_geral, aportes_vals, proporcoes
     )
-    rebalanc_form = formatar_df_rebalanceamento(rebalanc)
+    rebalanc_form, rebalanc_config = formatar_df_rebalanceamento(rebalanc)
     reserva = carteira_rf.loc[carteira_rf["reserva"], "saldo"].sum()
 
     st.markdown("#### Tabela de rebalanceamento")
-    st.dataframe(rebalanc_form, hide_index=True, use_container_width=True)
+    st.dataframe(rebalanc_form, column_config=rebalanc_config, hide_index=True, use_container_width=True)
 
     # Métricas e patrimônio externo
     st.markdown("#### Patrimônio total")
