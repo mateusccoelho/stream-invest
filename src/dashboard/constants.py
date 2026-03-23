@@ -2,7 +2,6 @@
 
 from src.database import listar_classes_ativos
 
-
 TIPOS_RF = ["CDB", "LCI", "LCA"]
 FORMAS_RF = ["Pós", "Pré"]
 INDEXADORES_RF = ["CDI", "Pré", "IPCA +"]

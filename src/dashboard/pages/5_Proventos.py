@@ -50,10 +50,20 @@ def pagina_proventos(proventos: pd.DataFrame):
     st.plotly_chart(plotar_proventos(proventos_filt, agrup_por_ativo))
 
     st.markdown("### Resumo dos ativos")
-    st.dataframe(prov_ativo_form, column_config=prov_ativo_config, hide_index=True, use_container_width=True)
+    st.dataframe(
+        prov_ativo_form,
+        column_config=prov_ativo_config,
+        hide_index=True,
+        use_container_width=True,
+    )
 
     st.markdown("### Detalhes")
-    st.dataframe(proventos_form, column_config=proventos_config, hide_index=True, use_container_width=True)
+    st.dataframe(
+        proventos_form,
+        column_config=proventos_config,
+        hide_index=True,
+        use_container_width=True,
+    )
 
 
 st.set_page_config(

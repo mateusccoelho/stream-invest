@@ -65,7 +65,9 @@ def pagina_rebalanceamento(
         )
         st.dataframe(
             resumo,
-            column_config={"Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f")},
+            column_config={
+                "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f")
+            },
             hide_index=True,
             use_container_width=True,
         )
@@ -83,7 +85,12 @@ def pagina_rebalanceamento(
     reserva = carteira_rf.loc[carteira_rf["reserva"], "saldo"].sum()
 
     st.markdown("#### Tabela de rebalanceamento")
-    st.dataframe(rebalanc_form, column_config=rebalanc_config, hide_index=True, use_container_width=True)
+    st.dataframe(
+        rebalanc_form,
+        column_config=rebalanc_config,
+        hide_index=True,
+        use_container_width=True,
+    )
 
     # Métricas e patrimônio externo
     st.markdown("#### Patrimônio total")

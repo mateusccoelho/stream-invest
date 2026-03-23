@@ -37,14 +37,19 @@ def pagina_renda_fixa(
         if not filtrar_invativos:
             renda_fixa_df = renda_fixa_df[renda_fixa_df["status"].eq(1)]
 
-    df_rf_formatado, rf_config = formatar_df_renda_fixa(renda_fixa_df, filtrar_invativos)
+    df_rf_formatado, rf_config = formatar_df_renda_fixa(
+        renda_fixa_df, filtrar_invativos
+    )
 
     st.markdown("# Renda Fixa")
     mostrar_metricas(calcular_metricas_rend(renda_fixa_df, "rf"))
 
     df_rf_formatado.insert(0, "", False)
     df_rf_editado = st.data_editor(
-        df_rf_formatado, column_config=rf_config, hide_index=True, use_container_width=True
+        df_rf_formatado,
+        column_config=rf_config,
+        hide_index=True,
+        use_container_width=True,
     )
 
     st.markdown("### Estudo de taxas CDI")
@@ -53,11 +58,17 @@ def pagina_renda_fixa(
     df_taxas_agg_fmt, taxas_agg_config = formatar_df_taxas_agg(df_taxas_agg)
     cols[0].markdown("##### Detalhes")
     cols[0].dataframe(
-        df_taxas_fmt, column_config=taxas_config, hide_index=True, use_container_width=True
+        df_taxas_fmt,
+        column_config=taxas_config,
+        hide_index=True,
+        use_container_width=True,
     )
     cols[1].markdown("##### Agregado")
     cols[1].dataframe(
-        df_taxas_agg_fmt, column_config=taxas_agg_config, hide_index=True, use_container_width=True
+        df_taxas_agg_fmt,
+        column_config=taxas_agg_config,
+        hide_index=True,
+        use_container_width=True,
     )
 
     st.markdown("### Emissores")
@@ -82,10 +93,17 @@ def pagina_renda_fixa(
 
         cols = st.columns(5)
         cols[0].metric("Rentabilidade", f"{titulo_selecionado['Retorno']:.2f}%")
-        cols[1].metric("Rendimentos", formatar_dinheiro(titulo_selecionado["Rendimentos"]))
+        cols[1].metric(
+            "Rendimentos", formatar_dinheiro(titulo_selecionado["Rendimentos"])
+        )
         cols[2].metric("Saldo", formatar_dinheiro(titulo_selecionado["Saldo"]))
-        cols[3].metric("Data de vencimento", titulo_selecionado["Vencimento"].strftime("%d/%m/%Y"))
-        cols[4].metric("Data de atualização", titulo_selecionado["Atualização"].strftime("%d/%m/%Y"))
+        cols[3].metric(
+            "Data de vencimento", titulo_selecionado["Vencimento"].strftime("%d/%m/%Y")
+        )
+        cols[4].metric(
+            "Data de atualização",
+            titulo_selecionado["Atualização"].strftime("%d/%m/%Y"),
+        )
 
         st.html("<br>")
         cols = st.columns([2, 1])
@@ -100,7 +118,9 @@ def pagina_renda_fixa(
             cols[1].markdown("Nenhum resgate encontrado.")
         else:
             resgates_fmt, resgates_config = formatar_df_resgates(resgates_titulo)
-            cols[1].dataframe(resgates_fmt, column_config=resgates_config, hide_index=True)
+            cols[1].dataframe(
+                resgates_fmt, column_config=resgates_config, hide_index=True
+            )
 
 
 st.set_page_config(

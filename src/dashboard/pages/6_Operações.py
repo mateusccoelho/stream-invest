@@ -102,8 +102,10 @@ def pagina_operacoes():
                     x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
                     for x in required
                 ):
-                    st.write(x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
-                    for x in required)
+                    st.write(
+                        x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
+                        for x in required
+                    )
                     st.error("Preencha todos os campos obrigatórios.")
                 elif data_vencimento <= data_compra:
                     st.error("Data de vencimento deve ser posterior à data de compra.")

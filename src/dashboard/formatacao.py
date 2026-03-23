@@ -11,6 +11,7 @@ DfComConfig = Tuple[pd.DataFrame, dict]
 
 # Formatação de valores individuais (para métricas, textos)
 
+
 def formatar_dinheiro(valor: float) -> str:
     return locale.currency(valor, grouping=True, symbol="R$")
 
@@ -20,6 +21,7 @@ def formatar_porcentagem(valor: float) -> str:
 
 
 # Helpers para column_config
+
 
 def _col_dinheiro(label: str) -> st.column_config.NumberColumn:
     return st.column_config.NumberColumn(label, format="R$ %.2f")
@@ -293,9 +295,7 @@ def formatar_df_taxas(df: pd.DataFrame) -> DfComConfig:
     for col in ["taxa", "taxa_desc"]:
         df[col] = df[col] * 100
 
-    df = df.filter(
-        ["id", "tipo", "faixa_prazo", "taxa", "taxa_desc", "valor"]
-    ).rename(
+    df = df.filter(["id", "tipo", "faixa_prazo", "taxa", "taxa_desc", "valor"]).rename(
         columns={
             "id": "ID",
             "tipo": "Tipo",
