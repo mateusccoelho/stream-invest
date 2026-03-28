@@ -104,38 +104,6 @@ def criar_tabelas():
     """Cria as tabelas caso não existam e aplica migrações pendentes."""
     with conectar() as conn:
         conn.executescript(_SCHEMA_SQL)
-    migrar_aportes_rf_para_autoincrement()
-
-
-def migrar_aportes_rf_para_autoincrement() -> None:
-    """Migra aportes_rf para usar AUTOINCREMENT no id. Idempotente."""
-    with conectar() as conn:
-        row = conn.execute(
-            "SELECT sql FROM sqlite_master WHERE type='table' AND name='aportes_rf'"
-        ).fetchone()
-        if row is None or "AUTOINCREMENT" in row[0]:
-            return  # tabela não existe ou já foi migrada
-
-        conn.execute("PRAGMA foreign_keys=OFF")
-        conn.execute("ALTER TABLE aportes_rf RENAME TO aportes_rf_old")
-        conn.execute("""
-            CREATE TABLE aportes_rf (
-                id              INTEGER PRIMARY KEY AUTOINCREMENT,
-                corretora       TEXT    NOT NULL,
-                emissor         TEXT    NOT NULL,
-                tipo            TEXT    NOT NULL,
-                forma           TEXT    NOT NULL,
-                data_compra     TEXT    NOT NULL,
-                data_vencimento TEXT    NOT NULL,
-                indexador       TEXT    NOT NULL,
-                taxa            REAL    NOT NULL,
-                valor           REAL    NOT NULL,
-                reserva         INTEGER NOT NULL DEFAULT 0
-            )
-            """)
-        conn.execute("INSERT INTO aportes_rf SELECT * FROM aportes_rf_old")
-        conn.execute("DROP TABLE aportes_rf_old")
-        conn.execute("PRAGMA foreign_keys=ON")
 
 
 # ---------------------------------------------------------------------------
