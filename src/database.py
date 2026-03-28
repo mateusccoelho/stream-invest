@@ -160,7 +160,8 @@ def ler_aportes_rf() -> pd.DataFrame:
 def ler_resgates_rf() -> pd.DataFrame:
     with conectar() as conn:
         df = pd.read_sql_query(
-            "SELECT id, data_resgate, valor, final FROM resgates_rf ORDER BY data_resgate",
+            "SELECT id, data_resgate, valor, final "
+            "FROM resgates_rf ORDER BY data_resgate",
             conn,
         )
     df["data_resgate"] = pd.to_datetime(df["data_resgate"]).dt.date

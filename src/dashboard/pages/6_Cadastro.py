@@ -71,7 +71,7 @@ def _tab_aporte_rf(aportes_rf: pd.DataFrame):
 
     if not submitted:
         return
-    
+
     required = [
         corretora,
         emissor,
@@ -89,13 +89,11 @@ def _tab_aporte_rf(aportes_rf: pd.DataFrame):
     ):
         st.error("Preencha todos os campos obrigatórios.")
         return
-    
+
     if data_vencimento <= data_compra:
-        st.error(
-            "Data de vencimento deve ser posterior à data de compra."
-        )
+        st.error("Data de vencimento deve ser posterior à data de compra.")
         return
-    
+
     novo_id = inserir_aporte_rf(
         corretora=corretora,
         emissor=emissor,
@@ -116,14 +114,12 @@ def _tab_resgate_rf(aportes_rf: pd.DataFrame, resgates_rf: pd.DataFrame):
     """Aba para cadastro de resgates de renda fixa."""
 
     ids_com_resgate_final = resgates_rf.loc[resgates_rf["final"], "id"].tolist()
-    aportes_ativos = aportes_rf.loc[
-        ~aportes_rf["id"].isin(ids_com_resgate_final), :
-    ]
+    aportes_ativos = aportes_rf.loc[~aportes_rf["id"].isin(ids_com_resgate_final), :]
 
     if aportes_ativos.empty:
         st.warning("Não há aportes RF ativos para resgatar.")
         return
-    
+
     with st.expander("Ver aportes ativos"):
         st.dataframe(
             aportes_ativos[
@@ -156,13 +152,11 @@ def _tab_resgate_rf(aportes_rf: pd.DataFrame, resgates_rf: pd.DataFrame):
             value=None,
         )
         final = st.checkbox("Resgate total (final)")
-        submitted = st.form_submit_button(
-            "💾 Cadastrar resgate", width="stretch"
-        )
+        submitted = st.form_submit_button("💾 Cadastrar resgate", width="stretch")
 
     if not submitted:
         return
-    
+
     required = [id_resgate, data_resgate, valor_resgate]
     if any(
         x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
@@ -170,7 +164,7 @@ def _tab_resgate_rf(aportes_rf: pd.DataFrame, resgates_rf: pd.DataFrame):
     ):
         st.error("Preencha todos os campos obrigatórios.")
         return
-    
+
     inserir_resgate_rf(
         id_aporte=id_resgate,
         data_resgate=data_resgate,
@@ -184,9 +178,7 @@ def _tab_resgate_rf(aportes_rf: pd.DataFrame, resgates_rf: pd.DataFrame):
     limpar_cache()
 
 
-def _tab_transacao_rv(
-    ativos_rv: pd.DataFrame, transacoes_rv: pd.DataFrame
-):
+def _tab_transacao_rv(ativos_rv: pd.DataFrame, transacoes_rv: pd.DataFrame):
     """Aba para cadastro de transações de renda variável."""
 
     codigos = sorted(ativos_rv["codigo"].tolist())
@@ -207,9 +199,7 @@ def _tab_transacao_rv(
         )
 
         cols2 = st.columns(3)
-        qtd_trans = cols2[0].number_input(
-            "Quantidade", min_value=0, step=1, value=None
-        )
+        qtd_trans = cols2[0].number_input("Quantidade", min_value=0, step=1, value=None)
         preco_trans = cols2[1].number_input(
             "Preço unitário (R$)",
             min_value=0.0,
@@ -225,7 +215,7 @@ def _tab_transacao_rv(
 
     if not submitted:
         return
-    
+
     required = [
         data_trans,
         codigo_trans,
@@ -240,7 +230,7 @@ def _tab_transacao_rv(
     ):
         st.error("Preencha todos os campos obrigatórios.")
         return
-    
+
     inserir_transacao_rv(
         data=data_trans,
         codigo=codigo_trans,
@@ -259,9 +249,7 @@ def _tab_transacao_rv(
     limpar_cache()
 
 
-def _tab_provento_rv(
-    ativos_rv: pd.DataFrame, proventos: pd.DataFrame
-):
+def _tab_provento_rv(ativos_rv: pd.DataFrame, proventos: pd.DataFrame):
     """Aba para cadastro de proventos de renda variável."""
 
     codigos = sorted(ativos_rv["codigo"].tolist())
@@ -271,9 +259,7 @@ def _tab_provento_rv(
         cols = st.columns(4)
         data_prov = cols[0].date_input("Data de pagamento", value=None)
         codigo_prov = cols[1].selectbox("Código do ativo", codigos, index=None)
-        qtd_prov = cols[2].number_input(
-            "Quantidade", min_value=0, step=1, value=None
-        )
+        qtd_prov = cols[2].number_input("Quantidade", min_value=0, step=1, value=None)
         valor_prov = cols[3].number_input(
             "Valor unitário (R$)",
             min_value=0.0,
@@ -289,7 +275,7 @@ def _tab_provento_rv(
 
     if not submitted:
         return
-    
+
     required = [data_prov, codigo_prov, qtd_prov, valor_prov, tipo_prov]
     if any(
         x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
@@ -297,7 +283,7 @@ def _tab_provento_rv(
     ):
         st.error("Preencha todos os campos obrigatórios.")
         return
-    
+
     inserir_provento_rv(
         data_pagamento=data_prov,
         codigo=codigo_prov,
@@ -332,20 +318,18 @@ def _tab_ativo_rv(ativos_rv: pd.DataFrame):
 
     if not submitted:
         return
-    
+
     required = [codigo_ativo, tipo_ativo, benchmark]
     if any(x is None or x == "" for x in required):
         st.error("Preencha todos os campos obrigatórios.")
         return
-    
+
     inserir_ativo_rv(
         codigo=codigo_ativo.upper(),
         tipo=tipo_ativo,
         benchmark=benchmark,
     )
-    st.success(
-        f"Ativo **{codigo_ativo.upper()}** cadastrado/atualizado!"
-    )
+    st.success(f"Ativo **{codigo_ativo.upper()}** cadastrado/atualizado!")
     limpar_cache()
 
 
