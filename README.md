@@ -39,7 +39,7 @@ python -m src.migra_excel_sqlite
 
 ### Cadastro de operações
 
-Novas operações podem ser cadastradas diretamente pelo dashboard na página **Operações** (aba lateral). Após cadastrar, reinicie o dashboard para que os dados sejam recalculados.
+Novas operações podem ser cadastradas diretamente pelo dashboard na página **Cadastro** (aba lateral).
 
 ### Banco de dados
 

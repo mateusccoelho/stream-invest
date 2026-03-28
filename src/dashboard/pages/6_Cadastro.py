@@ -1,5 +1,5 @@
 """
-Página para cadastro de novas operações diretamente pelo dashboard.
+Página de cadastro de novas operações do dashboard.
 """
 
 import sys
@@ -388,8 +388,8 @@ def pagina_operacoes(
     proporcoes: pd.DataFrame,
     transacoes_rv: pd.DataFrame,
     proventos: pd.DataFrame,
-):
-    """Página principal de operações com abas para cada funcionalidade."""
+) -> None:
+    """Página principal de cadastro com abas para cada funcionalidade."""
 
     st.markdown("# Cadastro de Operações")
 
@@ -424,7 +424,7 @@ def pagina_operacoes(
 
 
 st.set_page_config(
-    page_title="Operações",
+    page_title="Cadastro de Operações",
     page_icon=":pencil:",
     layout="wide",
     initial_sidebar_state="expanded",
