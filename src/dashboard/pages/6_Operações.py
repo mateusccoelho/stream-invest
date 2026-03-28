@@ -29,8 +29,6 @@ def limpar_cache():
 def _tab_aporte_rf(aportes_rf: pd.DataFrame):
     """Aba para cadastro de novos aportes de renda fixa."""
 
-    st.markdown("### Novo aporte de renda fixa")
-
     corretoras_rf = sorted(aportes_rf["corretora"].dropna().unique().tolist())
     emissores_rf = sorted(aportes_rf["emissor"].dropna().unique().tolist())
     tipos_rf = sorted(aportes_rf["tipo"].dropna().unique().tolist())
@@ -116,8 +114,6 @@ def _tab_aporte_rf(aportes_rf: pd.DataFrame):
 
 def _tab_resgate_rf(aportes_rf: pd.DataFrame, resgates_rf: pd.DataFrame):
     """Aba para cadastro de resgates de renda fixa."""
-    
-    st.markdown("### Novo resgate de renda fixa")
 
     ids_com_resgate_final = resgates_rf.loc[resgates_rf["final"], "id"].tolist()
     aportes_ativos = aportes_rf.loc[
@@ -192,8 +188,6 @@ def _tab_transacao_rv(
     ativos_rv: pd.DataFrame, transacoes_rv: pd.DataFrame
 ):
     """Aba para cadastro de transações de renda variável."""
-
-    st.markdown("### Nova transação de renda variável")
 
     codigos = sorted(ativos_rv["codigo"].tolist())
     corretoras_rv = sorted(transacoes_rv["corretora"].dropna().unique().tolist())
@@ -270,8 +264,6 @@ def _tab_provento_rv(
 ):
     """Aba para cadastro de proventos de renda variável."""
 
-    st.markdown("### Novo provento de renda variável")
-
     codigos = sorted(ativos_rv["codigo"].tolist())
     tipos_prov = sorted(proventos["tipo"].dropna().unique().tolist())
 
@@ -322,8 +314,6 @@ def _tab_provento_rv(
 
 def _tab_ativo_rv(ativos_rv: pd.DataFrame):
     """Aba para cadastro/atualização de ativos de renda variável."""
-    
-    st.markdown("### Cadastrar / atualizar ativo de renda variável")
 
     tipos_ativo_rv = sorted(ativos_rv["tipo_ativo"].dropna().unique().tolist())
     benchmarks = sorted(ativos_rv["bench"].dropna().unique().tolist())
@@ -362,7 +352,6 @@ def _tab_ativo_rv(ativos_rv: pd.DataFrame):
 def _tab_proporcoes(proporcoes: pd.DataFrame):
     """Aba para edição de proporções alvo da carteira."""
 
-    st.markdown("### Proporções alvo da carteira")
     st.caption("Edite os valores de proporção e clique em salvar.")
 
     editado = st.data_editor(
@@ -401,12 +390,8 @@ def pagina_operacoes(
     proventos: pd.DataFrame,
 ):
     """Página principal de operações com abas para cada funcionalidade."""
-    
+
     st.markdown("# Cadastro de Operações")
-    st.caption(
-        "Adicione novas operações ao banco de dados. "
-        "Após cadastrar, reinicie o dashboard para ver os dados atualizados."
-    )
 
     tabs = st.tabs(
         [
