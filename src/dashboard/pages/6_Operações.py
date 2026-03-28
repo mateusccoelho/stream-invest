@@ -6,6 +6,7 @@ import sys
 
 sys.path.append("..")
 
+import pandas as pd
 import streamlit as st
 
 from src.database import (
@@ -15,12 +16,8 @@ from src.database import (
     inserir_provento_rv,
     inserir_ativo_rv,
     atualizar_proporcoes,
-    proximo_id_aporte_rf,
-    listar_codigos_rv,
-    listar_ids_aportes_rf_ativos,
-    ler_proporcoes,
-    ler_aportes_rf,
 )
+from src.dashboard.dados import carregar_dados
 from src.dashboard.constants import (
     TIPOS_RF,
     FORMAS_RF,
@@ -37,7 +34,12 @@ def limpar_cache():
     st.cache_resource.clear()
 
 
-def pagina_operacoes():
+def pagina_operacoes(
+    aportes_rf: pd.DataFrame,
+    ativos_rv: pd.DataFrame,
+    resgates_rf: pd.DataFrame,
+    proporcoes: pd.DataFrame,
+):
     st.markdown("# Cadastro de Operações")
     st.caption(
         "Adicione novas operações ao banco de dados. "
@@ -58,8 +60,6 @@ def pagina_operacoes():
     # Aporte RF
     with tabs[0]:
         st.markdown("### Novo aporte de renda fixa")
-        prox_id = proximo_id_aporte_rf()
-        st.info(f"Próximo ID disponível: **{prox_id}**")
 
         with st.form("form_aporte_rf", clear_on_submit=True):
             cols = st.columns(3)
@@ -129,12 +129,16 @@ def pagina_operacoes():
     with tabs[1]:
         st.markdown("### Novo resgate de renda fixa")
 
-        ids_ativos = listar_ids_aportes_rf_ativos()
-        if not ids_ativos:
+        ids_com_resgate_final = resgates_rf.loc[
+            resgates_rf["final"], "id"
+        ].tolist()
+        aportes_ativos = aportes_rf.loc[
+            ~aportes_rf["id"].isin(ids_com_resgate_final), :
+        ]
+
+        if aportes_ativos.empty:
             st.warning("Não há aportes RF ativos para resgatar.")
         else:
-            aportes_df = ler_aportes_rf()
-            aportes_ativos = aportes_df[aportes_df["id"].isin(ids_ativos)]
             with st.expander("Ver aportes ativos"):
                 st.dataframe(
                     aportes_ativos[
@@ -155,7 +159,7 @@ def pagina_operacoes():
 
             with st.form("form_resgate_rf", clear_on_submit=True):
                 cols = st.columns(3)
-                id_resgate = cols[0].selectbox("ID do aporte", ids_ativos, index=None)
+                id_resgate = cols[0].selectbox("ID do aporte", sorted(aportes_ativos["id"].tolist()), index=None)
                 data_resgate = cols[1].date_input("Data do resgate", value=None)
                 valor_resgate = cols[2].number_input(
                     "Valor resgatado (R$)",
@@ -193,7 +197,7 @@ def pagina_operacoes():
     with tabs[2]:
         st.markdown("### Nova transação de renda variável")
 
-        codigos = listar_codigos_rv()
+        codigos = sorted(ativos_rv["codigo"].tolist())
 
         with st.form("form_transacao_rv", clear_on_submit=True):
             cols = st.columns(4)
@@ -264,7 +268,7 @@ def pagina_operacoes():
     with tabs[3]:
         st.markdown("### Novo provento de renda variável")
 
-        codigos = listar_codigos_rv()
+        codigos = sorted(ativos_rv["codigo"].tolist())
 
         with st.form("form_provento_rv", clear_on_submit=True):
             cols = st.columns(4)
@@ -343,13 +347,12 @@ def pagina_operacoes():
     with tabs[5]:
         st.markdown("### Proporções alvo da carteira")
 
-        proporcoes_atuais = ler_proporcoes()
-        if proporcoes_atuais.empty:
+        if proporcoes.empty:
             st.warning("Nenhuma proporção cadastrada.")
         else:
             st.caption("Edite os valores de proporção e clique em salvar.")
             editado = st.data_editor(
-                proporcoes_atuais,
+                proporcoes,
                 column_config={
                     "classe": st.column_config.TextColumn("Classe", disabled=True),
                     "proporcao": st.column_config.NumberColumn(
@@ -379,4 +382,10 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-pagina_operacoes()
+dados = carregar_dados()
+pagina_operacoes(
+    aportes_rf=dados["aportes_rf"],
+    ativos_rv=dados["ativos_rv"],
+    resgates_rf=dados["resgates_rf"],
+    proporcoes=dados["proporcoes"],
+)

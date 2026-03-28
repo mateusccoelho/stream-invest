@@ -45,7 +45,7 @@ def conectar():
 
 _SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS aportes_rf (
-    id              INTEGER PRIMARY KEY,
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
     corretora       TEXT    NOT NULL,
     emissor         TEXT    NOT NULL,
     tipo            TEXT    NOT NULL,
@@ -101,9 +101,43 @@ CREATE TABLE IF NOT EXISTS proporcoes (
 
 
 def criar_tabelas():
-    """Cria as tabelas caso não existam."""
+    """Cria as tabelas caso não existam e aplica migrações pendentes."""
     with conectar() as conn:
         conn.executescript(_SCHEMA_SQL)
+    migrar_aportes_rf_para_autoincrement()
+
+
+def migrar_aportes_rf_para_autoincrement() -> None:
+    """Migra aportes_rf para usar AUTOINCREMENT no id. Idempotente."""
+    with conectar() as conn:
+        row = conn.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='aportes_rf'"
+        ).fetchone()
+        if row is None or "AUTOINCREMENT" in row[0]:
+            return  # tabela não existe ou já foi migrada
+
+        conn.execute("PRAGMA foreign_keys=OFF")
+        conn.execute("ALTER TABLE aportes_rf RENAME TO aportes_rf_old")
+        conn.execute(
+            """
+            CREATE TABLE aportes_rf (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                corretora       TEXT    NOT NULL,
+                emissor         TEXT    NOT NULL,
+                tipo            TEXT    NOT NULL,
+                forma           TEXT    NOT NULL,
+                data_compra     TEXT    NOT NULL,
+                data_vencimento TEXT    NOT NULL,
+                indexador       TEXT    NOT NULL,
+                taxa            REAL    NOT NULL,
+                valor           REAL    NOT NULL,
+                reserva         INTEGER NOT NULL DEFAULT 0
+            )
+            """
+        )
+        conn.execute("INSERT INTO aportes_rf SELECT * FROM aportes_rf_old")
+        conn.execute("DROP TABLE aportes_rf_old")
+        conn.execute("PRAGMA foreign_keys=ON")
 
 
 # ---------------------------------------------------------------------------
@@ -295,45 +329,3 @@ def atualizar_proporcoes(proporcoes: dict[str, float]) -> None:
                 "UPDATE proporcoes SET proporcao = ? WHERE classe = ?",
                 (proporcao, classe),
             )
-
-
-# ---------------------------------------------------------------------------
-# Utilitários
-# ---------------------------------------------------------------------------
-
-
-def proximo_id_aporte_rf() -> int:
-    """Retorna o próximo ID disponível para aportes RF."""
-
-    with conectar() as conn:
-        row = conn.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM aportes_rf").fetchone()
-        return row[0]
-
-
-def listar_codigos_rv() -> list[str]:
-    """Lista todos os códigos de ativos RV cadastrados."""
-
-    with conectar() as conn:
-        rows = conn.execute("SELECT codigo FROM ativos_rv ORDER BY codigo").fetchall()
-    return [r[0] for r in rows]
-
-
-def listar_classes_ativos() -> list[str]:
-    """Lista as classes de ativos presentes na tabela de proporções."""
-
-    with conectar() as conn:
-        rows = conn.execute("SELECT classe FROM proporcoes ORDER BY classe").fetchall()
-    return [r[0] for r in rows]
-
-
-def listar_ids_aportes_rf_ativos() -> list[int]:
-    """Lista IDs de aportes RF que ainda não tiveram resgate final."""
-
-    with conectar() as conn:
-        rows = conn.execute(
-            "SELECT a.id FROM aportes_rf a "
-            "WHERE NOT EXISTS ("
-            "  SELECT 1 FROM resgates_rf r WHERE r.id = a.id AND r.final = 1"
-            ") ORDER BY a.id"
-        ).fetchall()
-    return [r[0] for r in rows]
