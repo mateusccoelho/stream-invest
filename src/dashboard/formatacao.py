@@ -197,7 +197,7 @@ def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> DfComConfig:
     for col in ["data"]:
         df[col] = pd.to_datetime(df[col])
 
-    for col in ["retorno"]:
+    for col in ["retorno", "retorno_com_proventos"]:
         df[col] = df[col] * 100
 
     df = df.filter(
@@ -211,6 +211,8 @@ def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> DfComConfig:
             "patrimonio",
             "rendimento_total",
             "retorno",
+            "total_proventos",
+            "retorno_com_proventos",
             "data",
         ]
     ).rename(
@@ -225,6 +227,8 @@ def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> DfComConfig:
             "codigo": "Código",
             "tipo": "Tipo",
             "retorno": "Retorno",
+            "total_proventos": "Proventos",
+            "retorno_com_proventos": "Retorno com proventos",
         }
     )
 
@@ -233,7 +237,9 @@ def formatar_df_renda_var(df: pd.DataFrame, inativos=False) -> DfComConfig:
         "Preço atual": _col_dinheiro("Preço atual"),
         "Variação total": _col_dinheiro("Variação total"),
         "Patrimônio": _col_dinheiro("Patrimônio"),
+        "Proventos": _col_dinheiro("Proventos"),
         "Retorno": _col_porcentagem("Retorno"),
+        "Retorno com proventos": _col_porcentagem("Retorno com proventos"),
         "Atualização": _col_data("Atualização"),
     }
     return df, column_config

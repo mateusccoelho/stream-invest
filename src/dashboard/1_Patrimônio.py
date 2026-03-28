@@ -107,7 +107,9 @@ st.set_page_config(
 
 dados = carregar_dados()
 renda_var_df = enriquecer_df_renda_var(
-    ativos_rv=dados["ativos_rv"], carteira_rv=dados["carteira_rv"]
+    ativos_rv=dados["ativos_rv"],
+    carteira_rv=dados["carteira_rv"],
+    proventos=dados["proventos"],
 )
 renda_fixa_df = enriquecer_df_renda_fixa(dados["carteira_rf"], dados["aportes_rf"])
 patrimonio_rv = enriquecer_patrimonio_rv(dados["ativos_rv"], dados["patrimonio_rv"])

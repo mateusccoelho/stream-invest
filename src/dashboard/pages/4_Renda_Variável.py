@@ -71,6 +71,8 @@ st.set_page_config(
 
 dados = carregar_dados()
 renda_var_df = enriquecer_df_renda_var(
-    ativos_rv=dados["ativos_rv"], carteira_rv=dados["carteira_rv"]
+    ativos_rv=dados["ativos_rv"],
+    carteira_rv=dados["carteira_rv"],
+    proventos=dados["proventos"],
 )
 pagina_renda_variavel(renda_var_df, dados["transacoes_rv"])

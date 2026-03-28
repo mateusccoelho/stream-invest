@@ -25,10 +25,21 @@ def enriquecer_df_renda_fixa(
 
 @st.cache_resource
 def enriquecer_df_renda_var(
-    ativos_rv: pd.DataFrame, carteira_rv: pd.DataFrame
+    ativos_rv: pd.DataFrame, carteira_rv: pd.DataFrame, proventos: pd.DataFrame
 ) -> pd.DataFrame:
+    proventos_por_ativo = proventos.groupby("codigo", as_index=False)["total"].sum()
+    proventos_por_ativo = proventos_por_ativo.rename(
+        columns={"total": "total_proventos"}
+    )
+
     df = ativos_rv.merge(carteira_rv, on="codigo", how="inner")
+    df = df.merge(proventos_por_ativo, on="codigo", how="left")
+    df["total_proventos"] = df["total_proventos"].fillna(0)
+
     df["retorno"] = df["rendimento_total"] / (df["preco_medio"] * df["qtd"])
+    df["retorno_com_proventos"] = (df["rendimento_total"] + df["total_proventos"]) / (
+        df["preco_medio"] * df["qtd"]
+    )
     df["preco_atual"] = df["patrimonio"] / df["qtd"]
     return df
 
