@@ -118,8 +118,7 @@ def migrar_aportes_rf_para_autoincrement() -> None:
 
         conn.execute("PRAGMA foreign_keys=OFF")
         conn.execute("ALTER TABLE aportes_rf RENAME TO aportes_rf_old")
-        conn.execute(
-            """
+        conn.execute("""
             CREATE TABLE aportes_rf (
                 id              INTEGER PRIMARY KEY AUTOINCREMENT,
                 corretora       TEXT    NOT NULL,
@@ -133,8 +132,7 @@ def migrar_aportes_rf_para_autoincrement() -> None:
                 valor           REAL    NOT NULL,
                 reserva         INTEGER NOT NULL DEFAULT 0
             )
-            """
-        )
+            """)
         conn.execute("INSERT INTO aportes_rf SELECT * FROM aportes_rf_old")
         conn.execute("DROP TABLE aportes_rf_old")
         conn.execute("PRAGMA foreign_keys=ON")

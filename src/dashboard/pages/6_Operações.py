@@ -82,9 +82,7 @@ def pagina_operacoes(
             )
 
             reserva = st.checkbox("Reserva de emergência")
-            submitted = st.form_submit_button(
-                "💾 Cadastrar aporte", width="stretch"
-            )
+            submitted = st.form_submit_button("💾 Cadastrar aporte", width="stretch")
 
             if submitted:
                 required = [
@@ -129,9 +127,7 @@ def pagina_operacoes(
     with tabs[1]:
         st.markdown("### Novo resgate de renda fixa")
 
-        ids_com_resgate_final = resgates_rf.loc[
-            resgates_rf["final"], "id"
-        ].tolist()
+        ids_com_resgate_final = resgates_rf.loc[resgates_rf["final"], "id"].tolist()
         aportes_ativos = aportes_rf.loc[
             ~aportes_rf["id"].isin(ids_com_resgate_final), :
         ]
@@ -159,7 +155,9 @@ def pagina_operacoes(
 
             with st.form("form_resgate_rf", clear_on_submit=True):
                 cols = st.columns(3)
-                id_resgate = cols[0].selectbox("ID do aporte", sorted(aportes_ativos["id"].tolist()), index=None)
+                id_resgate = cols[0].selectbox(
+                    "ID do aporte", sorted(aportes_ativos["id"].tolist()), index=None
+                )
                 data_resgate = cols[1].date_input("Data do resgate", value=None)
                 valor_resgate = cols[2].number_input(
                     "Valor resgatado (R$)",
@@ -229,9 +227,7 @@ def pagina_operacoes(
                 "Taxas (R$)", min_value=0.0, step=0.01, format="%.2f", value=None
             )
 
-            submitted = st.form_submit_button(
-                "💾 Cadastrar transação", width="stretch"
-            )
+            submitted = st.form_submit_button("💾 Cadastrar transação", width="stretch")
 
             if submitted:
                 required = [
@@ -289,9 +285,7 @@ def pagina_operacoes(
             )
 
             tipo_prov = st.selectbox("Tipo", TIPOS_PROVENTO_RV, index=None)
-            submitted = st.form_submit_button(
-                "💾 Cadastrar provento", width="stretch"
-            )
+            submitted = st.form_submit_button("💾 Cadastrar provento", width="stretch")
 
             if submitted:
                 required = [data_prov, codigo_prov, qtd_prov, valor_prov, tipo_prov]
@@ -324,9 +318,7 @@ def pagina_operacoes(
             tipo_ativo = cols[1].selectbox("Tipo", TIPOS_ATIVO_RV, index=None)
             benchmark = cols[2].text_input("Benchmark")
 
-            submitted = st.form_submit_button(
-                "💾 Cadastrar ativo", width="stretch"
-            )
+            submitted = st.form_submit_button("💾 Cadastrar ativo", width="stretch")
 
             if submitted:
                 required = [codigo_ativo, tipo_ativo, benchmark]

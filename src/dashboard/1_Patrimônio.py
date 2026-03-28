@@ -61,9 +61,7 @@ def pagina_patrimonio(
     etfs = renda_var_df.loc[renda_var_df["tipo_ativo"].eq("ETF")]
     mostrar_metricas(calcular_metricas_rend(etfs, "rv"))
     etfs_fmt, etfs_config = formatar_df_renda_var(etfs)
-    st.dataframe(
-        etfs_fmt, column_config=etfs_config, hide_index=True, width="stretch"
-    )
+    st.dataframe(etfs_fmt, column_config=etfs_config, hide_index=True, width="stretch")
 
     st.markdown("### FI-Infra")
     fiinfra = renda_var_df.loc[renda_var_df["tipo_ativo"].eq("FI-Infra")]
