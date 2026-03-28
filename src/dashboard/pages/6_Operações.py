@@ -18,14 +18,6 @@ from src.database import (
     atualizar_proporcoes,
 )
 from src.dashboard.dados import carregar_dados
-from src.dashboard.constants import (
-    TIPOS_RF,
-    FORMAS_RF,
-    INDEXADORES_RF,
-    OPERACOES_RV,
-    TIPOS_ATIVO_RV,
-    TIPOS_PROVENTO_RV,
-)
 from src.dashboard.formatacao import formatar_dinheiro
 
 
@@ -39,6 +31,8 @@ def pagina_operacoes(
     ativos_rv: pd.DataFrame,
     resgates_rf: pd.DataFrame,
     proporcoes: pd.DataFrame,
+    transacoes_rv: pd.DataFrame,
+    proventos: pd.DataFrame,
 ):
     st.markdown("# Cadastro de Operações")
     st.caption(
@@ -60,16 +54,32 @@ def pagina_operacoes(
     # Aporte RF
     with tabs[0]:
         st.markdown("### Novo aporte de renda fixa")
+        corretoras_rf = sorted(aportes_rf["corretora"].dropna().unique().tolist())
+        emissores_rf = sorted(aportes_rf["emissor"].dropna().unique().tolist())
+        tipos_rf = sorted(aportes_rf["tipo"].dropna().unique().tolist())
+        formas_rf = sorted(aportes_rf["forma"].dropna().unique().tolist())
+        indexadores_rf = sorted(aportes_rf["index"].dropna().unique().tolist())
 
         with st.form("form_aporte_rf", clear_on_submit=True):
             cols = st.columns(3)
-            corretora = cols[0].text_input("Corretora")
-            emissor = cols[1].text_input("Emissor")
-            tipo_rf = cols[2].selectbox("Tipo", TIPOS_RF, index=None)
+
+            corretora = cols[0].selectbox(
+                "Corretora", corretoras_rf, index=None, accept_new_options=True
+            )
+            emissor = cols[1].selectbox(
+                "Emissor", emissores_rf, index=None, accept_new_options=True
+            )
+            tipo_rf = cols[2].selectbox(
+                "Tipo", tipos_rf, index=None, accept_new_options=True
+            )
 
             cols2 = st.columns(3)
-            forma = cols2[0].selectbox("Forma", FORMAS_RF, index=None)
-            indexador = cols2[1].selectbox("Indexador", INDEXADORES_RF, index=None)
+            forma = cols2[0].selectbox(
+                "Forma", formas_rf, index=None, accept_new_options=True
+            )
+            indexador = cols2[1].selectbox(
+                "Indexador", indexadores_rf, index=None, accept_new_options=True
+            )
             taxa = cols2[2].number_input(
                 "Taxa (%)", min_value=0.0, step=0.01, format="%.4f", value=None
             )
@@ -100,10 +110,6 @@ def pagina_operacoes(
                     x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
                     for x in required
                 ):
-                    st.write(
-                        x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
-                        for x in required
-                    )
                     st.error("Preencha todos os campos obrigatórios.")
                 elif data_vencimento <= data_compra:
                     st.error("Data de vencimento deve ser posterior à data de compra.")
@@ -196,21 +202,21 @@ def pagina_operacoes(
         st.markdown("### Nova transação de renda variável")
 
         codigos = sorted(ativos_rv["codigo"].tolist())
+        corretoras_rv = sorted(transacoes_rv["corretora"].dropna().unique().tolist())
 
         with st.form("form_transacao_rv", clear_on_submit=True):
             cols = st.columns(4)
             data_trans = cols[0].date_input("Data", value=None)
-            if codigos:
-                codigo_trans = cols[1].selectbox("Código do ativo", codigos, index=None)
-            else:
-                codigo_trans = cols[1].text_input("Código do ativo")
+            codigo_trans = cols[1].selectbox("Código do ativo", codigos, index=None)
             operacao = cols[2].selectbox(
                 "Operação",
-                OPERACOES_RV,
+                ["C", "V"],
                 index=None,
                 format_func=lambda x: "Compra" if x == "C" else "Venda",
             )
-            corretora_rv = cols[3].text_input("Corretora")
+            corretora_rv = cols[3].selectbox(
+                "Corretora", corretoras_rv, index=None, accept_new_options=True
+            )
 
             cols2 = st.columns(3)
             qtd_trans = cols2[0].number_input(
@@ -265,14 +271,12 @@ def pagina_operacoes(
         st.markdown("### Novo provento de renda variável")
 
         codigos = sorted(ativos_rv["codigo"].tolist())
+        tipos_prov = sorted(proventos["tipo"].dropna().unique().tolist())
 
         with st.form("form_provento_rv", clear_on_submit=True):
             cols = st.columns(4)
             data_prov = cols[0].date_input("Data de pagamento", value=None)
-            if codigos:
-                codigo_prov = cols[1].selectbox("Código do ativo", codigos, index=None)
-            else:
-                codigo_prov = cols[1].text_input("Código do ativo")
+            codigo_prov = cols[1].selectbox("Código do ativo", codigos, index=None)
             qtd_prov = cols[2].number_input(
                 "Quantidade", min_value=0, step=1, value=None
             )
@@ -284,7 +288,9 @@ def pagina_operacoes(
                 value=None,
             )
 
-            tipo_prov = st.selectbox("Tipo", TIPOS_PROVENTO_RV, index=None)
+            tipo_prov = st.selectbox(
+                "Tipo", tipos_prov, index=None, accept_new_options=True
+            )
             submitted = st.form_submit_button("💾 Cadastrar provento", width="stretch")
 
             if submitted:
@@ -312,11 +318,18 @@ def pagina_operacoes(
     with tabs[4]:
         st.markdown("### Cadastrar / atualizar ativo de renda variável")
 
+        tipos_ativo_rv = sorted(ativos_rv["tipo_ativo"].dropna().unique().tolist())
+        benchmarks = sorted(ativos_rv["bench"].dropna().unique().tolist())
+
         with st.form("form_ativo_rv", clear_on_submit=True):
             cols = st.columns(3)
             codigo_ativo = cols[0].text_input("Código do ativo")
-            tipo_ativo = cols[1].selectbox("Tipo", TIPOS_ATIVO_RV, index=None)
-            benchmark = cols[2].text_input("Benchmark")
+            tipo_ativo = cols[1].selectbox(
+                "Tipo", tipos_ativo_rv, index=None, accept_new_options=True
+            )
+            benchmark = cols[2].selectbox(
+                "Benchmark", benchmarks, index=None, accept_new_options=True
+            )
 
             submitted = st.form_submit_button("💾 Cadastrar ativo", width="stretch")
 
@@ -380,4 +393,6 @@ pagina_operacoes(
     ativos_rv=dados["ativos_rv"],
     resgates_rf=dados["resgates_rf"],
     proporcoes=dados["proporcoes"],
+    transacoes_rv=dados["transacoes_rv"],
+    proventos=dados["proventos"],
 )
