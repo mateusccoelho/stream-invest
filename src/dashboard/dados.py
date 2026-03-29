@@ -6,7 +6,7 @@ sys.path.append("..")
 import pandas as pd
 import streamlit as st
 
-from src.consolidacao_carteira import consolidar_carteira
+from src.consolidacao.consolidacao_carteira import consolidar_carteira
 
 
 @st.cache_resource

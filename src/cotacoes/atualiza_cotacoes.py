@@ -1,8 +1,8 @@
 from datetime import date, timedelta
 
-from utils.calendario import dias_uteis_no_intervalo
-from indicadores import IMAB5, VNA, TickerBolsa, CDI
-from database import ler_datas_cotacoes, inserir_cotacao
+from src.utils.calendario import dias_uteis_no_intervalo
+from src.cotacoes.indicadores import IMAB5, VNA, TickerBolsa, CDI
+from src.database.database import ler_datas_cotacoes, inserir_cotacao
 
 indicadores = {
     "ACWI11": TickerBolsa("ACWI11.SA"),

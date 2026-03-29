@@ -2,9 +2,9 @@ from datetime import date
 
 import pandas as pd
 
-from src.consolidacao_variavel import consolidar_renda_variavel
-from src.consolidacao_fixa import consolidar_renda_fixa
-from src.database import (
+from src.consolidacao.consolidacao_variavel import consolidar_renda_variavel
+from src.consolidacao.consolidacao_fixa import consolidar_renda_fixa
+from src.database.database import (
     ler_aportes_rf,
     ler_cotacoes,
     ler_resgates_rf,

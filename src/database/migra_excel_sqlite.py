@@ -10,7 +10,7 @@ A planilha Excel original não é removida.
 
 import pandas as pd
 
-from src.database import (
+from src.database.database import (
     CAMINHO_DB,
     CAMINHO_DADOS,
     criar_tabelas,

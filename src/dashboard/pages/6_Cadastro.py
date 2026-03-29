@@ -3,7 +3,7 @@
 import pandas as pd
 import streamlit as st
 
-from src.database import (
+from src.database.database import (
     inserir_aporte_rf,
     inserir_resgate_rf,
     inserir_transacao_rv,

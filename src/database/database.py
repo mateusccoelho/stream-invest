@@ -12,7 +12,7 @@ from datetime import date
 
 import pandas as pd
 
-CAMINHO_DADOS = Path(__file__).resolve().parent.parent / "dados"
+CAMINHO_DADOS = Path(__file__).resolve().parent.parent.parent / "dados"
 CAMINHO_DB = CAMINHO_DADOS / "investimentos.db"
 
 
