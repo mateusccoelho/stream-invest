@@ -1,9 +1,12 @@
 from datetime import date
 
 import pandas as pd
+import pandera.pandas as pa
 
 from src.consolidacao.consolidacao_variavel import consolidar_renda_variavel
 from src.consolidacao.consolidacao_fixa import consolidar_renda_fixa
+from src.database.schemas import CotacoesSchema, ProventosRVSchema
+from src.consolidacao.schemas import ProventosTratadosSchema
 from src.database.database import (
     ler_aportes_rf,
     ler_cotacoes,
@@ -15,6 +18,8 @@ from src.database.database import (
 )
 
 
+@pa.check_output(ProventosTratadosSchema)
+@pa.check_output(ProventosRVSchema)
 def tratar_proventos(proventos: pd.DataFrame) -> pd.DataFrame:
     proventos = proventos.sort_values(["dt_pag", "codigo"], ascending=False)
     proventos["total"] = (proventos["qtd"] * proventos["valor"]).round(2)
@@ -22,6 +27,7 @@ def tratar_proventos(proventos: pd.DataFrame) -> pd.DataFrame:
     return proventos
 
 
+@pa.check_output(CotacoesSchema)
 def _calcular_variacoes(cotacoes: pd.DataFrame) -> pd.DataFrame:
     """Calcula a coluna 'variacao' via pct_change agrupado por codigo."""
 
@@ -59,3 +65,7 @@ def consolidar_carteira() -> dict[str, pd.DataFrame]:
         "cotacoes": cotacoes,
         "proporcoes": proporcoes,
     }
+
+
+if __name__ == "__main__":
+    consolidar_carteira()

@@ -2,12 +2,13 @@ from datetime import date
 
 import pandas as pd
 
+import src.consolidacao.schemas as schemas
 from src.utils.calendario import dias_uteis_no_intervalo
 
 
 def consolidar_renda_fixa(
     aportes: pd.DataFrame, resgates: pd.DataFrame, cotacoes: pd.DataFrame
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """O caso em que o valor calculado aqui e o valor devolvido real não batem deve
     ser tratado. Pode-se adicionar um resgate com o valor real e criar uma coluna para
     indicar os resgates finais."""
@@ -82,7 +83,10 @@ def consolidar_renda_fixa(
 
     patrimonio_rf = pd.concat(patrimonio_rf, ignore_index=True)
     carteira_rf = pd.DataFrame(carteira_rf)
-    return patrimonio_rf, carteira_rf
+    return (
+        schemas.PatrimonioRFSchema.validate(patrimonio_rf), 
+        schemas.CarteiraRFSchema.validate(carteira_rf)
+    )
 
 
 def obter_serie_variacao(

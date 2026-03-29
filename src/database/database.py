@@ -11,6 +11,9 @@ from pathlib import Path
 from datetime import date
 
 import pandas as pd
+import pandera.pandas as pa
+
+import src.database.schemas as schemas
 
 CAMINHO_DADOS = Path(__file__).resolve().parent.parent.parent / "dados"
 CAMINHO_DB = CAMINHO_DADOS / "investimentos.db"
@@ -120,6 +123,7 @@ def criar_tabelas():
 # ---------------------------------------------------------------------------
 
 
+@pa.check_output(schemas.AportesRFSchema)
 def ler_aportes_rf() -> pd.DataFrame:
     with conectar() as conn:
         df = pd.read_sql_query(
@@ -134,6 +138,7 @@ def ler_aportes_rf() -> pd.DataFrame:
     return df
 
 
+@pa.check_output(schemas.ResgatesRFSchema)
 def ler_resgates_rf() -> pd.DataFrame:
     with conectar() as conn:
         df = pd.read_sql_query(
@@ -146,6 +151,7 @@ def ler_resgates_rf() -> pd.DataFrame:
     return df
 
 
+@pa.check_output(schemas.TransacoesRVSchema)
 def ler_transacoes_rv() -> pd.DataFrame:
     with conectar() as conn:
         df = pd.read_sql_query(
@@ -157,6 +163,7 @@ def ler_transacoes_rv() -> pd.DataFrame:
     return df
 
 
+@pa.check_output(schemas.ProventosRVSchema)
 def ler_proventos_rv() -> pd.DataFrame:
     with conectar() as conn:
         df = pd.read_sql_query(
@@ -168,6 +175,7 @@ def ler_proventos_rv() -> pd.DataFrame:
     return df
 
 
+@pa.check_output(schemas.AtivosRVSchema)
 def ler_ativos_rv() -> pd.DataFrame:
     with conectar() as conn:
         df = pd.read_sql_query(
@@ -178,12 +186,14 @@ def ler_ativos_rv() -> pd.DataFrame:
     return df
 
 
+@pa.check_output(schemas.ProporcoesSchema)
 def ler_proporcoes() -> pd.DataFrame:
     with conectar() as conn:
         df = pd.read_sql_query("SELECT classe, proporcao FROM proporcoes", conn)
     return df
 
 
+@pa.check_output(schemas.CotacoesSchema)
 def ler_cotacoes() -> pd.DataFrame:
     """Retorna o histórico completo de cotações / indicadores."""
     with conectar() as conn:

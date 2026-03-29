@@ -3,6 +3,7 @@ from datetime import date
 import pandas as pd
 
 from src.utils.calendario import dias_uteis_no_intervalo
+import src.consolidacao.schemas as schemas
 
 
 def calcula_qtd_preco_medio(df: pd.DataFrame) -> pd.DataFrame:
@@ -95,4 +96,7 @@ def consolidar_renda_variavel(
     carteira_rv["rendimento_total"] = (
         carteira_rv["patrimonio"] - carteira_rv["preco_medio"] * carteira_rv["qtd"]
     )
-    return patrimonio_rv, carteira_rv
+    return (
+        schemas.PatrimonioRVSchema.validate(patrimonio_rv), 
+        schemas.CarteiraRVSchema.validate(carteira_rv)
+    )
