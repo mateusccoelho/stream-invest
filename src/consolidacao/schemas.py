@@ -16,7 +16,7 @@ ProventosTratadosSchema = pa.DataFrameSchema(
         "anomes": pa.Column(object, checks=_data_check),
     },
     name="proventos_tratados",
-    strict="filter",
+    strict=False,
 )
 
 PatrimonioRFSchema = pa.DataFrameSchema(
