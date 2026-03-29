@@ -386,3 +386,66 @@ def calcular_rendimento_diario(
 
     patrimonio = patrimonio.merge(cotacoes, on="data", how="left")
     return patrimonio
+
+
+@st.cache_resource
+def calcular_ir_etfs(
+    transacoes_rv: pd.DataFrame,
+    ativos_rv: pd.DataFrame,
+    patrimonio_rv: pd.DataFrame,
+) -> pd.DataFrame:
+    """Calcula o imposto de renda sobre vendas de ETFs de renda variável.
+
+    Para cada venda, usa o preço médio já calculado em patrimonio_rv
+    (que já inclui taxas de compra), computa o valor líquido de venda
+    (descontadas as taxas) e o IR devido (15% sobre o lucro, se houver).
+    """
+
+    _colunas = [
+        "data_venda",
+        "codigo",
+        "qtd",
+        "preco_venda",
+        "taxas_venda",
+        "valor_venda_liq",
+        "preco_medio",
+        "custo",
+        "lucro",
+        "ir",
+    ]
+
+    etfs = ativos_rv.loc[ativos_rv["tipo_ativo"].eq("ETF"), "codigo"].tolist()
+    vendas = transacoes_rv[
+        transacoes_rv["codigo"].isin(etfs) & transacoes_rv["tipo"].eq("V")
+    ].copy()
+
+    if vendas.empty:
+        return pd.DataFrame(columns=_colunas)
+
+    # Obtém o preço médio (já inclui taxas de compra) de patrimonio_rv
+    vendas = vendas.merge(
+        patrimonio_rv[["data", "codigo", "preco_medio"]],
+        on=["data", "codigo"],
+        how="left",
+    )
+
+    vendas["valor_venda_liq"] = (
+        vendas["qtd"] * vendas["preco"] - vendas["taxas"]
+    ).round(2)
+    vendas["custo"] = (vendas["qtd"] * vendas["preco_medio"]).round(2)
+    vendas["lucro"] = (vendas["valor_venda_liq"] - vendas["custo"]).round(2)
+    vendas["ir"] = (vendas["lucro"].clip(lower=0) * 0.15).round(2)
+
+    vendas = vendas.rename(
+        columns={
+            "data": "data_venda",
+            "preco": "preco_venda",
+            "taxas": "taxas_venda",
+        }
+    )
+
+    return (
+        vendas.filter(_colunas)
+        .sort_values("data_venda", ascending=False)
+        .reset_index(drop=True)
+    )

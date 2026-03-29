@@ -343,3 +343,37 @@ def formatar_df_taxas_agg(df: pd.DataFrame) -> DfComConfig:
         "Valor": _col_dinheiro("Valor"),
     }
     return df, column_config
+
+
+def formatar_ir_etfs(df: pd.DataFrame) -> DfComConfig:
+    df = df.copy()
+
+    for col in ["data_venda"]:
+        df[col] = pd.to_datetime(df[col])
+
+    df = df.rename(
+        columns={
+            "data_venda": "Data da venda",
+            "codigo": "Código",
+            "qtd": "Quantidade",
+            "preco_venda": "Preço de venda",
+            "taxas_venda": "Taxas",
+            "valor_venda_liq": "Valor líquido",
+            "preco_medio": "Preço médio",
+            "custo": "Custo",
+            "lucro": "Lucro/Prejuízo",
+            "ir": "IR devido",
+        }
+    )
+
+    column_config = {
+        "Data da venda": _col_data("Data da venda"),
+        "Preço de venda": _col_dinheiro("Preço de venda"),
+        "Taxas": _col_dinheiro("Taxas"),
+        "Valor líquido": _col_dinheiro("Valor líquido"),
+        "Preço médio": _col_dinheiro("Preço médio"),
+        "Custo": _col_dinheiro("Custo"),
+        "Lucro/Prejuízo": _col_dinheiro("Lucro/Prejuízo"),
+        "IR devido": _col_dinheiro("IR devido"),
+    }
+    return df, column_config

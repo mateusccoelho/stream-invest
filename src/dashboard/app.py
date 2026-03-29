@@ -47,9 +47,22 @@ cadastro = st.Page(
     title="Cadastro",
     icon="✏️",
 )
+imposto_renda = st.Page(
+    str(BASE_DIR / "pages" / "7_Imposto_de_Renda.py"),
+    title="Imposto de Renda",
+    icon="🧾",
+)
 
 navigation = st.navigation(
-    [patrimonio, rebalanceamento, renda_fixa, renda_variavel, proventos, cadastro],
+    [
+        patrimonio,
+        rebalanceamento,
+        renda_fixa,
+        renda_variavel,
+        proventos,
+        cadastro,
+        imposto_renda,
+    ],
     position="hidden",
 )
 
@@ -64,5 +77,6 @@ with st.sidebar:
     st.page_link(renda_variavel)
     st.page_link(proventos)
     st.page_link(cadastro)
+    st.page_link(imposto_renda)
 
 navigation.run()
