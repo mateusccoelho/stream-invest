@@ -18,6 +18,7 @@ from src.dashboard.graficos import plotar_proventos
 
 def pagina_proventos(proventos: pd.DataFrame):
     with st.sidebar:
+        st.divider()
         periodo = st.selectbox(
             "Período", ["6 meses", "1 ano", "2 anos", "Personalizado"]
         )

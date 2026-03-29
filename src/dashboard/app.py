@@ -3,7 +3,6 @@ import sys
 
 import streamlit as st
 
-
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parents[1]
 
@@ -53,16 +52,17 @@ navigation = st.navigation(
     [patrimonio, rebalanceamento, renda_fixa, renda_variavel, proventos, cadastro],
     position="hidden",
 )
-navigation.run()
 
 with st.sidebar:
     st.markdown("## 💰 Stream-invest")
     st.caption("Painel de acompanhamento de investimentos")
     st.space(size="xxsmall")
-    
+
     st.page_link(patrimonio)
     st.page_link(rebalanceamento)
     st.page_link(renda_fixa)
     st.page_link(renda_variavel)
     st.page_link(proventos)
     st.page_link(cadastro)
+
+navigation.run()

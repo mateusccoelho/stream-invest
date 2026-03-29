@@ -27,6 +27,7 @@ def mostrar_metricas_trans(metricas: tuple[int, date, float, float]):
 
 def pagina_renda_variavel(renda_var_df: pd.DataFrame, transacoes: pd.DataFrame):
     with st.sidebar:
+        st.divider()
         inativos = st.checkbox("Mostrar inativos", value=False)
         if not inativos:
             renda_var_df = renda_var_df[renda_var_df["qtd"].gt(0)]

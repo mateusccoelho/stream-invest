@@ -29,6 +29,7 @@ def pagina_renda_fixa(
 ):
     # Controles
     with st.sidebar:
+        st.divider()
         filtrar_invativos = st.checkbox("Mostrar inativos", value=False)
         if not filtrar_invativos:
             renda_fixa_df = renda_fixa_df[renda_fixa_df["status"].eq(1)]
