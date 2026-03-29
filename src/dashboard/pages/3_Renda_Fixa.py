@@ -1,7 +1,3 @@
-import sys
-
-sys.path.append("..")
-
 import pandas as pd
 import streamlit as st
 
@@ -122,13 +118,6 @@ def pagina_renda_fixa(
                 resgates_fmt, column_config=resgates_config, hide_index=True
             )
 
-
-st.set_page_config(
-    page_title="Renda Fixa",
-    page_icon=":moneybag:",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
 
 dados = carregar_dados()
 renda_fixa_df = enriquecer_df_renda_fixa(dados["carteira_rf"], dados["aportes_rf"])

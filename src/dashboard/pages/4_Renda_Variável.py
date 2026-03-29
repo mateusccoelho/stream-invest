@@ -1,7 +1,4 @@
 from datetime import date
-import sys
-
-sys.path.append("..")
 
 import pandas as pd
 import streamlit as st
@@ -61,13 +58,6 @@ def pagina_renda_variavel(renda_var_df: pd.DataFrame, transacoes: pd.DataFrame):
             width="stretch",
         )
 
-
-st.set_page_config(
-    page_title="Renda Variável",
-    page_icon=":moneybag:",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
 
 dados = carregar_dados()
 renda_var_df = enriquecer_df_renda_var(

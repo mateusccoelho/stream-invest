@@ -1,7 +1,3 @@
-import sys
-
-sys.path.append("../../")
-
 import streamlit as st
 import pandas as pd
 
@@ -113,13 +109,6 @@ def pagina_rebalanceamento(
     )
     metric_cols[2].metric("Reserva", formatar_dinheiro(reserva))
 
-
-st.set_page_config(
-    page_title="Rebalanceamento",
-    page_icon=":moneybag:",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
 
 dados = carregar_dados()
 carteira_rf, carteira_rv = enriquecer_dfs_carteira(

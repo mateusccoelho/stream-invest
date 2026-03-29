@@ -1,10 +1,4 @@
-"""
-Página de cadastro de novas operações do dashboard.
-"""
-
-import sys
-
-sys.path.append("..")
+"""Página de cadastro de novas operações do dashboard."""
 
 import pandas as pd
 import streamlit as st
@@ -406,13 +400,6 @@ def pagina_operacoes(
     with tabs[5]:
         _tab_proporcoes(proporcoes)
 
-
-st.set_page_config(
-    page_title="Cadastro de Operações",
-    page_icon=":pencil:",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
 
 dados = carregar_dados()
 pagina_operacoes(

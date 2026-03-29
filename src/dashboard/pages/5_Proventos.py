@@ -1,7 +1,4 @@
 from datetime import date, timedelta
-import sys
-
-sys.path.append("..")
 
 import streamlit as st
 import pandas as pd
@@ -65,13 +62,6 @@ def pagina_proventos(proventos: pd.DataFrame):
         width="stretch",
     )
 
-
-st.set_page_config(
-    page_title="Proventos",
-    page_icon=":moneybag:",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
 
 dados = carregar_dados()
 proventos = enriquecer_df_proventos(
