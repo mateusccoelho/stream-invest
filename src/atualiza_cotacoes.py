@@ -1,37 +1,34 @@
 from datetime import date, timedelta
 
-import pandas as pd
-
 from utils.calendario import dias_uteis_no_intervalo
 from indicadores import IMAB5, VNA, TickerBolsa, CDI
 from database import ler_datas_cotacoes, inserir_cotacao
 
-
 indicadores = {
     "ACWI11": TickerBolsa("ACWI11.SA"),
-    "B5P211": TickerBolsa("B5P211.SA"), 
-    "BDIF11": TickerBolsa("BDIF11.SA"), 
+    "B5P211": TickerBolsa("B5P211.SA"),
+    "BDIF11": TickerBolsa("BDIF11.SA"),
     "CDI": CDI(),
-    "CDII11": TickerBolsa("CDII11.SA"), 
-    "IBOV": TickerBolsa("^BVSP"), 
-    "IMAB 5": IMAB5(), 
-    "JURO11": TickerBolsa("JURO11.SA"), 
-    "PIBB11": TickerBolsa("PIBB11.SA"), 
-    "VNA": VNA()
+    "CDII11": TickerBolsa("CDII11.SA"),
+    "IBOV": TickerBolsa("^BVSP"),
+    "IMAB 5": IMAB5(),
+    "JURO11": TickerBolsa("JURO11.SA"),
+    "PIBB11": TickerBolsa("PIBB11.SA"),
+    "VNA": VNA(),
 }
 
 
 def atualizar_indicadores(dias: int = 180):
-    """Verifica se há cotações faltantes dentro de um período de tempo (padrão 180 dias). Se sim, serão extraídas e inseridas diretamente no banco."""
+    """Verifica se há cotações faltantes dentro de um período de
+    tempo (padrão 180 dias). Se sim, serão extraídas e inseridas
+    diretamente no banco."""
 
     data_fim = date.today()
     data_inicio = data_fim - timedelta(days=dias)
     dias_uteis = dias_uteis_no_intervalo(data_inicio, data_fim)
 
     for nome_indicador in indicadores:
-        datas_existentes = ler_datas_cotacoes(
-            nome_indicador, dias_uteis[0]
-        )
+        datas_existentes = ler_datas_cotacoes(nome_indicador, dias_uteis[0])
         datas_faltantes = [dia for dia in dias_uteis if dia not in datas_existentes]
 
         if not datas_faltantes:

@@ -196,9 +196,7 @@ def ler_cotacoes() -> pd.DataFrame:
     return df
 
 
-def ler_datas_cotacoes(
-    codigo: str, data_inicio: date | None = None
-) -> list[date]:
+def ler_datas_cotacoes(codigo: str, data_inicio: date | None = None) -> list[date]:
     """Lê cotações de um indicador, opcionalmente a partir de uma data."""
 
     with conectar() as conn:
@@ -211,15 +209,14 @@ def ler_datas_cotacoes(
             )
         else:
             df = pd.read_sql_query(
-                "SELECT DISTINCT data FROM cotacoes "
-                "WHERE codigo = ? ORDER BY data",
+                "SELECT DISTINCT data FROM cotacoes " "WHERE codigo = ? ORDER BY data",
                 conn,
                 params=(codigo,),
             )
 
     if not df.empty:
         return pd.to_datetime(df["data"]).dt.date.tolist()
-    
+
     return []
 
 

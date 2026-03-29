@@ -26,12 +26,8 @@ def _calcular_variacoes(cotacoes: pd.DataFrame) -> pd.DataFrame:
     """Calcula a coluna 'variacao' via pct_change agrupado por codigo."""
 
     cotacoes = cotacoes.sort_values(["codigo", "data"])
-    variacoes = (
-        cotacoes.groupby("codigo")["valor"].pct_change(fill_method=None) + 1
-    )
-    linhas_sem_variacao = (
-        cotacoes["valor"].notnull() & cotacoes["variacao"].isnull()
-    )
+    variacoes = cotacoes.groupby("codigo")["valor"].pct_change(fill_method=None) + 1
+    linhas_sem_variacao = cotacoes["valor"].notnull() & cotacoes["variacao"].isnull()
     cotacoes.loc[linhas_sem_variacao, "variacao"] = variacoes[linhas_sem_variacao]
     return cotacoes
 
