@@ -2,7 +2,7 @@ from datetime import date
 
 import pandas as pd
 
-from src.utils.calendario import calcular_dias_uteis_entre
+from src.utils.calendario import dias_uteis_no_intervalo
 
 
 def calcula_qtd_preco_medio(df: pd.DataFrame) -> pd.DataFrame:
@@ -60,7 +60,7 @@ def consolidar_renda_variavel(
             pd.DataFrame(
                 {
                     "codigo": codigo,
-                    "data": calcular_dias_uteis_entre(data_ini, date.today()),
+                    "data": dias_uteis_no_intervalo(data_ini, date.today()),
                 }
             )
             for codigo, data_ini in primeira_trans.items()

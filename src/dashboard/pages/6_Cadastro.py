@@ -372,7 +372,7 @@ def pagina_operacoes(
     proporcoes: pd.DataFrame,
     transacoes_rv: pd.DataFrame,
     proventos: pd.DataFrame,
-) -> None:
+):
     """Página principal de cadastro com abas para cada funcionalidade."""
 
     st.markdown("# Cadastro de Operações")

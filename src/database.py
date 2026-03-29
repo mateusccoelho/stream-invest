@@ -8,6 +8,7 @@ para substituir o uso da planilha Excel.
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
+from datetime import date
 
 import pandas as pd
 
@@ -97,6 +98,14 @@ CREATE TABLE IF NOT EXISTS proporcoes (
     classe          TEXT PRIMARY KEY,
     proporcao       REAL NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS cotacoes (
+    data            TEXT    NOT NULL,  -- YYYY-MM-DD
+    codigo          TEXT    NOT NULL,
+    valor           REAL,
+    variacao        REAL,
+    PRIMARY KEY (data, codigo)
+);
 """
 
 
@@ -175,6 +184,45 @@ def ler_proporcoes() -> pd.DataFrame:
     return df
 
 
+def ler_cotacoes() -> pd.DataFrame:
+    """Retorna o histórico completo de cotações / indicadores."""
+    with conectar() as conn:
+        df = pd.read_sql_query(
+            "SELECT data, codigo, valor, variacao FROM cotacoes "
+            "ORDER BY codigo, data",
+            conn,
+        )
+    df["data"] = pd.to_datetime(df["data"]).dt.date
+    return df
+
+
+def ler_datas_cotacoes(
+    codigo: str, data_inicio: date | None = None
+) -> list[date]:
+    """Lê cotações de um indicador, opcionalmente a partir de uma data."""
+
+    with conectar() as conn:
+        if data_inicio:
+            df = pd.read_sql_query(
+                "SELECT DISTINCT data FROM cotacoes "
+                "WHERE codigo = ? AND data >= ? ORDER BY data",
+                conn,
+                params=(codigo, str(data_inicio)),
+            )
+        else:
+            df = pd.read_sql_query(
+                "SELECT DISTINCT data FROM cotacoes "
+                "WHERE codigo = ? ORDER BY data",
+                conn,
+                params=(codigo,),
+            )
+
+    if not df.empty:
+        return pd.to_datetime(df["data"]).dt.date.tolist()
+    
+    return []
+
+
 # ---------------------------------------------------------------------------
 # Escrita – inserções unitárias (para o formulário do dashboard)
 # ---------------------------------------------------------------------------
@@ -220,7 +268,7 @@ def inserir_resgate_rf(
     data_resgate: str,
     valor: float,
     final: bool,
-) -> None:
+):
     with conectar() as conn:
         conn.execute(
             "INSERT INTO resgates_rf (id, data_resgate, valor, final) "
@@ -237,7 +285,7 @@ def inserir_transacao_rv(
     preco: float,
     corretora: str,
     taxas: float,
-) -> None:
+):
     with conectar() as conn:
         conn.execute(
             "INSERT INTO transacoes_rv "
@@ -253,7 +301,7 @@ def inserir_provento_rv(
     quantidade: int,
     valor: float,
     tipo: str = "Rendimento",
-) -> None:
+):
     with conectar() as conn:
         conn.execute(
             "INSERT INTO proventos_rv "
@@ -267,7 +315,7 @@ def inserir_ativo_rv(
     codigo: str,
     tipo: str,
     benchmark: str,
-) -> None:
+):
     with conectar() as conn:
         conn.execute(
             "INSERT OR REPLACE INTO ativos_rv (codigo, tipo, benchmark) "
@@ -276,18 +324,7 @@ def inserir_ativo_rv(
         )
 
 
-def inserir_proporcao(
-    classe: str,
-    proporcao: float,
-) -> None:
-    with conectar() as conn:
-        conn.execute(
-            "INSERT OR REPLACE INTO proporcoes (classe, proporcao) " "VALUES (?, ?)",
-            (classe, proporcao),
-        )
-
-
-def atualizar_proporcoes(proporcoes: dict[str, float]) -> None:
+def atualizar_proporcoes(proporcoes: dict[str, float]):
     """Atualiza as proporções existentes no banco."""
 
     with conectar() as conn:
@@ -296,3 +333,18 @@ def atualizar_proporcoes(proporcoes: dict[str, float]) -> None:
                 "UPDATE proporcoes SET proporcao = ? WHERE classe = ?",
                 (proporcao, classe),
             )
+
+
+def inserir_cotacao(
+    data: str,
+    codigo: str,
+    valor: float | None,
+    variacao: float | None,
+):
+    """Insere ou atualiza uma linha na tabela cotacoes."""
+    with conectar() as conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO cotacoes (data, codigo, valor, variacao) "
+            "VALUES (?, ?, ?, ?)",
+            (str(data), codigo, valor, variacao),
+        )
