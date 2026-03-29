@@ -18,6 +18,7 @@ from src.database import (
 )
 
 CAMINHO_EXCEL = CAMINHO_DADOS / "Investimentos.xlsx"
+CAMINHO_COTACOES = CAMINHO_DADOS / "cotacoes.parquet"
 
 
 def migrar():
@@ -140,6 +141,25 @@ def migrar():
                 ),
             )
     print(f"  Proporções: {len(df)} registros migrados.")
+
+    # --- Cotações ---
+    if CAMINHO_COTACOES.exists():
+        df = pd.read_parquet(CAMINHO_COTACOES)
+        with conectar() as conn:
+            for _, row in df.iterrows():
+                conn.execute(
+                    "INSERT OR REPLACE INTO cotacoes (data, codigo, valor, variacao) "
+                    "VALUES (?, ?, ?, ?)",
+                    (
+                        str(row["data"]),
+                        str(row["codigo"]),
+                        float(row["valor"]) if pd.notna(row["valor"]) else None,
+                        float(row["variacao"]) if pd.notna(row["variacao"]) else None,
+                    ),
+                )
+        print(f"  Cotações: {len(df)} registros migrados.")
+    else:
+        print(f"Arquivo de cotações não encontrado: {CAMINHO_COTACOES}")
 
     print(f"\nMigração concluída! Banco de dados: {CAMINHO_DB}")
 

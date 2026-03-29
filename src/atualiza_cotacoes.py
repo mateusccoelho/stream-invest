@@ -4,7 +4,7 @@ import pandas as pd
 
 from utils.calendario import dias_uteis_no_intervalo
 from indicadores import IMAB5, VNA, TickerBolsa, CDI
-from src.database import ler_datas_cotacoes, inserir_cotacao
+from database import ler_datas_cotacoes, inserir_cotacao
 
 
 indicadores = {
@@ -67,6 +67,7 @@ def atualizar_indicadores(dias: int = 180):
             print(
                 f"{nome_indicador} tem dados faltantes mas não é possível preenchê-los."
             )
+            print(f"Datas faltantes: {', '.join(str(d) for d in datas_faltantes)}")
 
 
 if __name__ == "__main__":
