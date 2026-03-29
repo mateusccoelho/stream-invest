@@ -84,8 +84,8 @@ def consolidar_renda_fixa(
     patrimonio_rf = pd.concat(patrimonio_rf, ignore_index=True)
     carteira_rf = pd.DataFrame(carteira_rf)
     return (
-        schemas.PatrimonioRFSchema.validate(patrimonio_rf), 
-        schemas.CarteiraRFSchema.validate(carteira_rf)
+        schemas.PatrimonioRFSchema.validate(patrimonio_rf),
+        schemas.CarteiraRFSchema.validate(carteira_rf),
     )
 
 

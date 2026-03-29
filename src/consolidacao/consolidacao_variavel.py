@@ -97,6 +97,6 @@ def consolidar_renda_variavel(
         carteira_rv["patrimonio"] - carteira_rv["preco_medio"] * carteira_rv["qtd"]
     )
     return (
-        schemas.PatrimonioRVSchema.validate(patrimonio_rv), 
-        schemas.CarteiraRVSchema.validate(carteira_rv)
+        schemas.PatrimonioRVSchema.validate(patrimonio_rv),
+        schemas.CarteiraRVSchema.validate(carteira_rv),
     )

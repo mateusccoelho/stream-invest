@@ -4,7 +4,6 @@ import datetime
 
 import pandera.pandas as pa
 
-
 _data_check = pa.Check(
     lambda s: s.apply(lambda x: isinstance(x, datetime.date)),
     element_wise=False,
