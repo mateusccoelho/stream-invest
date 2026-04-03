@@ -10,6 +10,7 @@ from src.database.database import (
     inserir_provento_rv,
     inserir_ativo_rv,
     atualizar_proporcoes,
+    inserir_pagamento_ir,
 )
 from src.dashboard.dados import carregar_dados
 from src.dashboard.formatacao import formatar_dinheiro
@@ -359,6 +360,55 @@ def _tab_proporcoes(proporcoes: pd.DataFrame):
     limpar_cache()
 
 
+def _tab_pagamento_ir():
+    """Aba para cadastro de pagamentos de IR (DARFs)."""
+
+    with st.form("form_pagamento_ir", clear_on_submit=True):
+        cols = st.columns(3)
+        data_pagamento = cols[0].date_input("Data do pagamento", value=None)
+        ano_ref = cols[1].number_input(
+            "Ano de referência", min_value=2000, max_value=2100, step=1, value=None
+        )
+        mes_ref = cols[2].selectbox(
+            "Mês de referência",
+            list(range(1, 13)),
+            index=None,
+            format_func=lambda m: [
+                "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+            ][m - 1],
+        )
+
+        valor = st.number_input(
+            "Valor pago (R$)", min_value=0.0, step=0.01, format="%.2f", value=None
+        )
+        submitted = st.form_submit_button(
+            "💾 Cadastrar pagamento", width="stretch"
+        )
+
+    if not submitted:
+        return
+
+    required = [data_pagamento, ano_ref, mes_ref, valor]
+    if any(
+        x is None or x == "" or (isinstance(x, (int, float)) and x <= 0)
+        for x in required
+    ):
+        st.error("Preencha todos os campos obrigatórios.")
+        return
+
+    inserir_pagamento_ir(
+        data_pagamento=data_pagamento,
+        ano_ref=ano_ref,
+        mes_ref=mes_ref,
+        valor=valor,
+    )
+    st.success(
+        f"Pagamento de IR de **{str(mes_ref).zfill(2)}/{ano_ref}** cadastrado!"
+    )
+    limpar_cache()
+
+
 def pagina_operacoes(
     aportes_rf: pd.DataFrame,
     ativos_rv: pd.DataFrame,
@@ -379,6 +429,7 @@ def pagina_operacoes(
             "Provento RV",
             "Ativo RV",
             "Proporções",
+            "Pagamento IR",
         ]
     )
 
@@ -399,6 +450,9 @@ def pagina_operacoes(
 
     with tabs[5]:
         _tab_proporcoes(proporcoes)
+
+    with tabs[6]:
+        _tab_pagamento_ir()
 
 
 dados = carregar_dados()

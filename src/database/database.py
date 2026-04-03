@@ -109,6 +109,14 @@ CREATE TABLE IF NOT EXISTS cotacoes (
     variacao        REAL,
     PRIMARY KEY (data, codigo)
 );
+
+CREATE TABLE IF NOT EXISTS pagamentos_ir (
+    rowid_          INTEGER PRIMARY KEY AUTOINCREMENT,
+    data_pagamento  TEXT    NOT NULL,  -- YYYY-MM-DD
+    ano_ref         INTEGER NOT NULL,
+    mes_ref         INTEGER NOT NULL,  -- 1-12
+    valor           REAL    NOT NULL
+);
 """
 
 
@@ -228,6 +236,19 @@ def ler_datas_cotacoes(codigo: str, data_inicio: date | None = None) -> list[dat
         return pd.to_datetime(df["data"]).dt.date.tolist()
 
     return []
+
+
+def ler_pagamentos_ir() -> pd.DataFrame:
+    """Retorna todos os pagamentos de IR registrados."""
+    with conectar() as conn:
+        df = pd.read_sql_query(
+            "SELECT rowid_, data_pagamento, ano_ref, mes_ref, valor "
+            "FROM pagamentos_ir ORDER BY ano_ref, mes_ref",
+            conn,
+        )
+    if not df.empty:
+        df["data_pagamento"] = pd.to_datetime(df["data_pagamento"]).dt.date
+    return df
 
 
 # ---------------------------------------------------------------------------
@@ -354,4 +375,20 @@ def inserir_cotacao(
             "INSERT OR REPLACE INTO cotacoes (data, codigo, valor, variacao) "
             "VALUES (?, ?, ?, ?)",
             (str(data), codigo, valor, variacao),
+        )
+
+
+def inserir_pagamento_ir(
+    data_pagamento: str,
+    ano_ref: int,
+    mes_ref: int,
+    valor: float,
+):
+    """Insere um pagamento de IR (DARF)."""
+    with conectar() as conn:
+        conn.execute(
+            "INSERT INTO pagamentos_ir "
+            "(data_pagamento, ano_ref, mes_ref, valor) "
+            "VALUES (?, ?, ?, ?)",
+            (str(data_pagamento), ano_ref, mes_ref, valor),
         )

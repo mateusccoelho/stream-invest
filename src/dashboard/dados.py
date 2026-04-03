@@ -389,6 +389,51 @@ def calcular_rendimento_diario(
 
 
 @st.cache_resource
+def montar_tabela_mensal_ir(
+    ir_df: pd.DataFrame,
+    pagamentos_ir: pd.DataFrame,
+) -> pd.DataFrame:
+    """Cria tabela mês a mês cruzando IR devido (vendas) com IR pago (DARFs)."""
+
+    _NOMES_MES = [
+        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+    ]
+
+    if not ir_df.empty:
+        ir_mensal = ir_df.copy()
+        ir_mensal["ano"] = ir_mensal["data_venda"].apply(lambda d: d.year)
+        ir_mensal["mes"] = ir_mensal["data_venda"].apply(lambda d: d.month)
+        devido = (
+            ir_mensal.groupby(["ano", "mes"], as_index=False)[["ir", "lucro"]]
+            .sum()
+            .rename(columns={"ir": "ir_devido"})
+        )
+    else:
+        devido = pd.DataFrame(columns=["ano", "mes", "ir_devido", "lucro"])
+
+    if not pagamentos_ir.empty:
+        pago = (
+            pagamentos_ir.groupby(["ano_ref", "mes_ref"], as_index=False)["valor"]
+            .sum()
+            .rename(columns={"ano_ref": "ano", "mes_ref": "mes", "valor": "ir_pago"})
+        )
+    else:
+        pago = pd.DataFrame(columns=["ano", "mes", "ir_pago"])
+
+    tabela = pd.merge(devido, pago, on=["ano", "mes"], how="outer").fillna(0)
+    tabela["ano"] = tabela["ano"].astype(int)
+    tabela["mes"] = tabela["mes"].astype(int)
+    tabela = tabela.sort_values(["ano", "mes"], ascending=False).reset_index(drop=True)
+    tabela["saldo"] = (tabela["ir_devido"] - tabela["ir_pago"]).clip(lower=0).round(2)
+    tabela["referencia"] = tabela.apply(
+        lambda r: f"{_NOMES_MES[int(r['mes']) - 1]}/{int(r['ano'])}", axis=1
+    )
+
+    return tabela[["referencia", "lucro", "ir_devido", "ir_pago", "saldo"]]
+
+
+@st.cache_resource
 def calcular_ir_etfs(
     transacoes_rv: pd.DataFrame,
     ativos_rv: pd.DataFrame,
@@ -414,7 +459,10 @@ def calcular_ir_etfs(
         "ir",
     ]
 
-    etfs = ativos_rv.loc[ativos_rv["tipo_ativo"].eq("ETF"), "codigo"].tolist()
+    etfs = ativos_rv.loc[
+        (ativos_rv["tipo_ativo"].eq("ETF")) & (ativos_rv["codigo"].ne("B5P211")),
+        "codigo"
+    ].tolist()
     vendas = transacoes_rv[
         transacoes_rv["codigo"].isin(etfs) & transacoes_rv["tipo"].eq("V")
     ].copy()
@@ -434,7 +482,7 @@ def calcular_ir_etfs(
     ).round(2)
     vendas["custo"] = (vendas["qtd"] * vendas["preco_medio"]).round(2)
     vendas["lucro"] = (vendas["valor_venda_liq"] - vendas["custo"]).round(2)
-    vendas["ir"] = (vendas["lucro"].clip(lower=0) * 0.15).round(2)
+    vendas["ir"] = (vendas["lucro"].clip(lower=0) * 0.15)
 
     vendas = vendas.rename(
         columns={

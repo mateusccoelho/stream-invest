@@ -345,6 +345,31 @@ def formatar_df_taxas_agg(df: pd.DataFrame) -> DfComConfig:
     return df, column_config
 
 
+def formatar_tabela_mensal_ir(df: pd.DataFrame):
+    df = df.copy().rename(
+        columns={
+            "referencia": "Referência",
+            "lucro": "Lucro/Prejuízo",
+            "ir_devido": "IR devido",
+            "ir_pago": "IR pago",
+            "saldo": "Saldo devedor",
+        }
+    )
+
+    styled = df.style.map(
+        lambda v: "color: green" if v <= 0.05 else "color: red",
+        subset=["Saldo devedor"],
+    )
+
+    column_config = {
+        "Lucro/Prejuízo": _col_dinheiro("Lucro/Prejuízo"),
+        "IR devido": _col_dinheiro("IR devido"),
+        "IR pago": _col_dinheiro("IR pago"),
+        "Saldo devedor": _col_dinheiro("Saldo devedor"),
+    }
+    return styled, column_config
+
+
 def formatar_ir_etfs(df: pd.DataFrame) -> DfComConfig:
     df = df.copy()
 

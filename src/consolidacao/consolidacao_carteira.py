@@ -15,6 +15,7 @@ from src.database.database import (
     ler_proventos_rv,
     ler_ativos_rv,
     ler_proporcoes,
+    ler_pagamentos_ir,
 )
 
 
@@ -51,6 +52,7 @@ def consolidar_carteira() -> dict[str, pd.DataFrame]:
         aportes_rf, resgates_rf, cotacoes
     )
     proporcoes = ler_proporcoes()
+    pagamentos_ir = ler_pagamentos_ir()
 
     return {
         "proventos": proventos,
@@ -64,6 +66,7 @@ def consolidar_carteira() -> dict[str, pd.DataFrame]:
         "carteira_rf": carteira_rf,
         "cotacoes": cotacoes,
         "proporcoes": proporcoes,
+        "pagamentos_ir": pagamentos_ir,
     }
 
 

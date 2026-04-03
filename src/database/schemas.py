@@ -96,3 +96,13 @@ CotacoesSchema = pa.DataFrameSchema(
     },
     name="cotacoes",
 )
+
+PagamentosIRSchema = pa.DataFrameSchema(
+    columns={
+        "data_pagamento": pa.Column(object, checks=_data_check),
+        "ano_ref": pa.Column(int),
+        "mes_ref": pa.Column(int, checks=pa.Check.in_range(1, 12)),
+        "valor": pa.Column(float, checks=pa.Check.gt(0)),
+    },
+    name="pagamentos_ir",
+)
