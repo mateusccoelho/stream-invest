@@ -434,6 +434,36 @@ def montar_tabela_mensal_ir(
 
 
 @st.cache_resource
+def calcular_posicao_fim_ano(
+    patrimonio_rv: pd.DataFrame,
+    ano: int,
+) -> pd.DataFrame:
+    """Retorna a posição dos ativos de renda variável em 31/12 do ano informado.
+
+    A posição é calculada como qtd * preco_medio. Caso 31/12 não seja dia útil,
+    usa o último dia útil disponível no ano.
+    """
+    fim_ano = date(ano, 12, 31)
+    df = patrimonio_rv.loc[patrimonio_rv["data"].le(fim_ano)].copy()
+    if df.empty:
+        return pd.DataFrame(columns=["codigo", "qtd", "preco_medio", "posicao"])
+
+    # Última data disponível por ativo até 31/12
+    ultimo_dia = df.groupby("codigo")["data"].max().reset_index()
+    ultimo_dia = ultimo_dia.rename(columns={"data": "data_ref"})
+    df = df.merge(ultimo_dia, on="codigo")
+    df = df.loc[df["data"].eq(df["data_ref"])].drop(columns=["data_ref"])
+
+    # Filtra somente ativos com posição > 0
+    df = df.loc[df["qtd"].gt(0)]
+    df["posicao"] = (df["qtd"] * df["preco_medio"]).round(2)
+
+    # Enriquece com info do ativo
+    df = df.filter(["codigo", "qtd", "preco_medio", "posicao"])
+    return df.sort_values("codigo").reset_index(drop=True)
+
+
+@st.cache_resource
 def calcular_ir_etfs(
     transacoes_rv: pd.DataFrame,
     ativos_rv: pd.DataFrame,

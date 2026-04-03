@@ -370,6 +370,23 @@ def formatar_tabela_mensal_ir(df: pd.DataFrame):
     return styled, column_config
 
 
+def formatar_posicao_fim_ano(df: pd.DataFrame) -> DfComConfig:
+    df = df.copy()
+    df = df.rename(
+        columns={
+            "codigo": "Código",
+            "qtd": "Quantidade",
+            "preco_medio": "Preço médio",
+            "posicao": "Posição",
+        }
+    )
+    column_config = {
+        "Preço médio": _col_dinheiro("Preço médio"),
+        "Posição": _col_dinheiro("Posição"),
+    }
+    return df, column_config
+
+
 def formatar_ir_etfs(df: pd.DataFrame) -> DfComConfig:
     df = df.copy()
 
