@@ -295,56 +295,6 @@ def formatar_transacoes_rv(df: pd.DataFrame) -> DfComConfig:
     return df, column_config
 
 
-def formatar_df_taxas(df: pd.DataFrame) -> DfComConfig:
-    df = df.copy()
-
-    for col in ["taxa", "taxa_desc"]:
-        df[col] = df[col] * 100
-
-    df = df.filter(["id", "tipo", "faixa_prazo", "taxa", "taxa_desc", "valor"]).rename(
-        columns={
-            "id": "ID",
-            "tipo": "Tipo",
-            "taxa": "Taxa",
-            "faixa_prazo": "Prazo",
-            "taxa_desc": "Taxa descontada",
-            "valor": "Valor",
-        }
-    )
-
-    column_config = {
-        "Taxa": _col_porcentagem("Taxa"),
-        "Taxa descontada": _col_porcentagem("Taxa descontada"),
-        "Valor": _col_dinheiro("Valor"),
-    }
-    return df, column_config
-
-
-def formatar_df_taxas_agg(df: pd.DataFrame) -> DfComConfig:
-    df = df.copy()
-
-    for col in ["proporcao", "taxa_media", "taxa_alvo"]:
-        df[col] = df[col] * 100
-
-    df = df.rename(
-        columns={
-            "faixa_prazo": "Prazo",
-            "proporcao": "Proporção",
-            "taxa_media": "Taxa média",
-            "valor": "Valor",
-            "taxa_alvo": "Taxa alvo",
-        }
-    )
-
-    column_config = {
-        "Proporção": _col_porcentagem("Proporção"),
-        "Taxa média": _col_porcentagem("Taxa média"),
-        "Taxa alvo": _col_porcentagem("Taxa alvo"),
-        "Valor": _col_dinheiro("Valor"),
-    }
-    return df, column_config
-
-
 def formatar_tabela_mensal_ir(df: pd.DataFrame):
     df = df.copy().rename(
         columns={

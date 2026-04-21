@@ -6,14 +6,11 @@ from src.dashboard.dados import (
     enriquecer_df_renda_fixa,
     obter_valores_titulo,
     obter_resgates_titulo,
-    criar_df_taxas,
     calcular_metricas_rend,
 )
 from src.dashboard.formatacao import (
     formatar_df_renda_fixa,
     formatar_df_resgates,
-    formatar_df_taxas,
-    formatar_df_taxas_agg,
     formatar_dinheiro,
 )
 from src.dashboard.graficos import plotar_saldo_no_tempo, plotar_emissores
@@ -24,8 +21,6 @@ def pagina_renda_fixa(
     renda_fixa_df: pd.DataFrame,
     patrimonio_rf: pd.DataFrame,
     resgates_rf: pd.DataFrame,
-    df_taxas: pd.DataFrame,
-    df_taxas_agg: pd.DataFrame,
 ):
     # Controles
     with st.sidebar:
@@ -45,25 +40,6 @@ def pagina_renda_fixa(
     df_rf_editado = st.data_editor(
         df_rf_formatado,
         column_config=rf_config,
-        hide_index=True,
-        width="stretch",
-    )
-
-    st.markdown("### Estudo de taxas CDI")
-    cols = st.columns([3, 2])
-    df_taxas_fmt, taxas_config = formatar_df_taxas(df_taxas)
-    df_taxas_agg_fmt, taxas_agg_config = formatar_df_taxas_agg(df_taxas_agg)
-    cols[0].markdown("##### Detalhes")
-    cols[0].dataframe(
-        df_taxas_fmt,
-        column_config=taxas_config,
-        hide_index=True,
-        width="stretch",
-    )
-    cols[1].markdown("##### Agregado")
-    cols[1].dataframe(
-        df_taxas_agg_fmt,
-        column_config=taxas_agg_config,
         hide_index=True,
         width="stretch",
     )
@@ -122,7 +98,6 @@ def pagina_renda_fixa(
 
 dados = carregar_dados()
 renda_fixa_df = enriquecer_df_renda_fixa(dados["carteira_rf"], dados["aportes_rf"])
-df_taxas, df_taxas_agg = criar_df_taxas(renda_fixa_df)
 pagina_renda_fixa(
-    renda_fixa_df, dados["patrimonio_rf"], dados["resgates_rf"], df_taxas, df_taxas_agg
+    renda_fixa_df, dados["patrimonio_rf"], dados["resgates_rf"]
 )
